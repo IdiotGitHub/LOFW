@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService {
      * 从controller层接收一个User Model类型的对象，但是一个UserModel对象对应的
      * 是一个UserDO和一个UserPasswordDO，因此要将其分开处理
      *
-     * @param userModel
+     * @param userModel 用户模型
      */
     @Transactional(rollbackFor = {})
     @Override
@@ -115,7 +115,6 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "手机号或原密码不正确");
         }
         userPasswordDaoMapper.updateByUserIdSelective(userDao.getId(), newPassword);
-        return;
     }
 
     @Override
@@ -131,9 +130,8 @@ public class UserServiceImpl implements UserService {
     public List<UserModel> getFollows(Integer userId) {
         List<FollowedDao> followedDaoList = followedDaoMapper.selectByUserId(userId);
         List<UserModel> userModelList = new ArrayList<>();
-        followedDaoList.forEach(followedDao -> {
-            userModelList.add(convertUserModelFromUserDao(userDaoMapper.selectByPrimaryKey(followedDao.getFollowedId()),userId));
-        });
+        followedDaoList.forEach(followedDao ->
+                userModelList.add(convertUserModelFromUserDao(userDaoMapper.selectByPrimaryKey(followedDao.getFollowedId()),userId)));
         return userModelList;
     }
 
@@ -141,9 +139,7 @@ public class UserServiceImpl implements UserService {
     public List<UserModel> getFans(Integer userId) {
         List<FollowedDao> followedDaoList = followedDaoMapper.selectByFollowedId(userId);
         List<UserModel> userModelList = new ArrayList<>();
-        followedDaoList.forEach(followedDao -> {
-            userModelList.add(convertUserModelFromUserDao(userDaoMapper.selectByPrimaryKey(followedDao.getUserId()),userId));
-        });
+        followedDaoList.forEach(followedDao -> userModelList.add(convertUserModelFromUserDao(userDaoMapper.selectByPrimaryKey(followedDao.getUserId()),userId)));
         return userModelList;
     }
 

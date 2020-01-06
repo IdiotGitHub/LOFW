@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -27,12 +28,14 @@ import java.util.Base64.Encoder;
  * Created on 2019/11/26 9:38
  *
  * @Author Xiaoxu
- * @Version 1.0
  */
 @Controller
 @CrossOrigin(origins = "*", allowCredentials = "true")
 @RequestMapping("/user")
 public class UserController /*extends BaseController*/ {
+    /**
+     *
+     */
     public static final String CONTENT_TYPE_FORMED = "application/x-www-form-urlencoded";
     public static final int USER_STATUS_BAN = 2;
     public static final int USER_STATUS_ALLOW = 1;
@@ -59,7 +62,7 @@ public class UserController /*extends BaseController*/ {
     public CommontReturnType updatePassword(@RequestParam("telphone") String telphone,
                                             @RequestParam("oldPassword") String oldPassword,
                                             @RequestParam("newPassword") String newPassword
-    ) throws BusinessException, UnsupportedEncodingException, NoSuchAlgorithmException {
+    ) throws BusinessException, NoSuchAlgorithmException {
         userService.updatePassword(telphone, enCodeByMd5(oldPassword), enCodeByMd5(newPassword));
         httpServletRequest.getSession().removeAttribute("loginUser");
         return CommontReturnType.create(null);
@@ -68,7 +71,8 @@ public class UserController /*extends BaseController*/ {
     @RequestMapping("/login")
     @ResponseBody
     public CommontReturnType login(@RequestParam("telphone") String telphone,
-                                   @RequestParam("password") String password) throws BusinessException, UnsupportedEncodingException, NoSuchAlgorithmException {
+                                   @RequestParam("password") String password)
+            throws BusinessException, NoSuchAlgorithmException {
         //拿到手机号密码，调用service层方法进行登录
         //对密码进行加密在进行比对
         UserModel u = userService.login(telphone, enCodeByMd5(password));
@@ -91,16 +95,15 @@ public class UserController /*extends BaseController*/ {
      * application/x-www-form-urlencoded
      * multipart/form-data
      *
-     * @param telphone
-     * @param optCode
-     * @param name
-     * @param gender
-     * @param age
-     * @param password
-     * @return
-     * @throws BusinessException
-     * @throws UnsupportedEncodingException
-     * @throws NoSuchAlgorithmException
+     * @param telphone 用户手机号
+     * @param optCode 验证码
+     * @param name 姓名
+     * @param gender 性别
+     * @param age 年龄
+     * @param password 密码
+     * @return 返回通用对象
+     * @throws BusinessException 自定义异常
+     * @throws NoSuchAlgorithmException 编码异常
      */
     @RequestMapping(value = "/register", method = {RequestMethod.POST}, consumes = {CONTENT_TYPE_FORMED})
     @ResponseBody
@@ -110,7 +113,7 @@ public class UserController /*extends BaseController*/ {
                                       @RequestParam("gender") Byte gender,
                                       @RequestParam("age") Integer age,
                                       @RequestParam("password") String password
-    ) throws BusinessException, UnsupportedEncodingException, NoSuchAlgorithmException {
+    ) throws BusinessException, NoSuchAlgorithmException {
         //验证手机号与对应的otp相结合
         //在生成otpCode的时候将code存入了session中，此时将其拿出来就可以啦
         //需要注意的是在处理Ajax跨域请求时，session是不可以进行共享的，需要对前后端同时进行Ajax跨域授信
@@ -138,14 +141,14 @@ public class UserController /*extends BaseController*/ {
      * java普通md5实现的方式实现的结果只支持16位的md5
      * 因此需要处理一下
      */
-    public String enCodeByMd5(String str) throws UnsupportedEncodingException, NoSuchAlgorithmException {
+    public String enCodeByMd5(String str) throws NoSuchAlgorithmException {
         //确定计算方法
         //使用MessageDigest类获取md5的实例
         MessageDigest md5 = MessageDigest.getInstance("MD5");
         //使用BASE64Encoder
         Encoder base64Encoder = Base64.getEncoder();
         //加密字符串
-        return base64Encoder.encodeToString(md5.digest(str.getBytes("utf-8")));
+        return base64Encoder.encodeToString(md5.digest(str.getBytes(StandardCharsets.UTF_8)));
     }
 
     @RequestMapping(value = "/getOtp", method = {RequestMethod.POST}, consumes = {CONTENT_TYPE_FORMED})
@@ -176,24 +179,22 @@ public class UserController /*extends BaseController*/ {
      * 获取关注人列表
      *
      * @param id 已登陆用户ID
-     * @return
-     * @throws BusinessException
+     * @return 返回通用对象
+     * @throws BusinessException 自定义异常
      */
     @RequestMapping("/getFans")
     @ResponseBody
     public CommontReturnType getFans(@RequestParam(name = "id") Integer id) throws BusinessException {
         //先判断用户是否已经登录，未登录不允许通过访问
         Boolean isLogin = (Boolean) httpServletRequest.getSession().getAttribute("isLogin");
-        if (isLogin == null || !isLogin.booleanValue()) {
+        if (isLogin == null || !isLogin) {
             throw new BusinessException(EmBusinessError.USER_NOT_LOGIN);
         }
         //调用service服务获取已登陆用户的关注人列表并返回给前端
         List<UserModel> userModels = userService.getFans(id);
         List<UserView> userViewList = new ArrayList<>();
         //将核心领域模型用户对象转化为可供UI使用的viewobject
-        userModels.forEach(userModel -> {
-            userViewList.add(convertFromUserModel(userModel));
-        });
+        userModels.forEach(userModel -> userViewList.add(convertFromUserModel(userModel)));
         return CommontReturnType.create(userViewList);
     }
 
@@ -202,16 +203,14 @@ public class UserController /*extends BaseController*/ {
     public CommontReturnType getFollows(@RequestParam(name = "id") Integer id) throws BusinessException {
         //先判断用户是否已经登录，未登录不允许通过访问
         Boolean isLogin = (Boolean) httpServletRequest.getSession().getAttribute("isLogin");
-        if (isLogin == null || !isLogin.booleanValue()) {
+        if (isLogin == null || !isLogin) {
             throw new BusinessException(EmBusinessError.USER_NOT_LOGIN);
         }
         //调用service服务获取已登陆用户的关注人列表并返回给前端
         List<UserModel> userModels = userService.getFollows(id);
         List<UserView> userViewList = new ArrayList<>();
         //将核心领域模型用户对象转化为可供UI使用的viewobject
-        userModels.forEach(userModel -> {
-            userViewList.add(convertFromUserModel(userModel));
-        });
+        userModels.forEach(userModel -> userViewList.add(convertFromUserModel(userModel)));
         return CommontReturnType.create(userViewList);
     }
 
@@ -220,7 +219,7 @@ public class UserController /*extends BaseController*/ {
     public CommontReturnType getUser(@RequestParam(name = "id") Integer id) throws BusinessException {
         //先判断用户是否已经登录，未登录不允许通过访问
         Boolean isLogin = (Boolean) httpServletRequest.getSession().getAttribute("isLogin");
-        if (isLogin == null || !isLogin.booleanValue()) {
+        if (isLogin == null || !isLogin) {
             throw new BusinessException(EmBusinessError.USER_NOT_LOGIN);
         }
         UserModel loginUser = (UserModel) httpServletRequest.getSession().getAttribute("loginUser");
@@ -238,7 +237,8 @@ public class UserController /*extends BaseController*/ {
         UserView userView = convertFromUserModel(user);
         return CommontReturnType.create(userView);
     }
- @RequestMapping("/getOffLineUser")
+
+    @RequestMapping("/getOffLineUser")
     @ResponseBody
     public CommontReturnType getOffLineUser(@RequestParam(name = "userId") Integer userId) throws BusinessException {
         //调用service服务获取对应id的用户对象并返回给前端
