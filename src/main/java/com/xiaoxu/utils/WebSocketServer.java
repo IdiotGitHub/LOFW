@@ -1,5 +1,7 @@
 package com.xiaoxu.utils;
 
+import com.alibaba.fastjson.JSON;
+import com.xiaoxu.dataobject.MessageDao;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.springframework.stereotype.Component;
@@ -16,7 +18,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * @author :Xiaoxu
  * @create 2019-12-19
  **/
-@ServerEndpoint("/websocket/{sid}")
+@ServerEndpoint("/websocket/{userId}")
 @Component
 public class WebSocketServer {
     static Log log = LogFactory.getLog(WebSocketServer.class);
@@ -43,18 +45,53 @@ public class WebSocketServer {
      * 连接建立成功调用的方法
      */
     @OnOpen
-    public void onOpen(Session session, @PathParam("sid") String sid) {
+    public void onOpen(Session session, @PathParam("userId") String sid) {
+
         this.session = session;
-        //加入set中
-        webSocketSet.add(this);
-        //在线数加1
-        addOnlineCount();
-        log.info("有新窗口开始监听:" + sid + ",当前在线人数为" + getOnlineCount());
-        this.sid = sid;
-        try {
-            sendMessage("连接成功");
-        } catch (IOException e) {
-            log.error("websocket IO异常");
+        if (webSocketSet.size() == 0) {
+            //加入set中
+            webSocketSet.add(this);
+            this.sid = sid;
+
+            MessageDao messageDao = new MessageDao();
+            messageDao.setUserId(Integer.valueOf(sid));
+            messageDao.setFlag(false);
+            messageDao.setMessage("连接成功");
+            messageDao.setOnlineCount(webSocketSet.size());
+            try {
+                sendMessage(JSON.toJSONString(messageDao));
+            } catch (IOException e) {
+                log.error("websocket IO异常");
+            }
+        } else {
+            boolean flag = false;
+            //之前能收到是因为无论如何当前页面的socket都被写到了set中，改进了之后如果set中存在相同的id号就不会被写入，所以收不到消息
+            for (WebSocketServer item : webSocketSet) {
+                if (item.sid.equals(sid)) {
+                    webSocketSet.remove(item);
+                    this.sid = sid;
+                    webSocketSet.add(this);
+                    flag = true;
+                    break;
+                }
+            }
+            if (flag) {
+                log.info("已经登陆;在线人数：" + webSocketSet.size());
+            } else {
+                //加入set中
+                webSocketSet.add(this);
+                this.sid = sid;
+                MessageDao messageDao = new MessageDao();
+                messageDao.setUserId(Integer.valueOf(sid));
+                messageDao.setFlag(false);
+                messageDao.setMessage("连接成功");
+                messageDao.setOnlineCount(webSocketSet.size());
+                try {
+                    sendMessage(JSON.toJSONString(messageDao));
+                } catch (IOException e) {
+                    log.error("websocket IO异常");
+                }
+            }
         }
     }
 
@@ -66,8 +103,7 @@ public class WebSocketServer {
         //从set中删除
         webSocketSet.remove(this);
         //在线数减1
-        subOnlineCount();
-        log.info("有一连接关闭！当前在线人数为" + getOnlineCount());
+        log.info("有一连接关闭！当前在线人数为" + webSocketSet.size());
     }
 
     /**
@@ -95,7 +131,7 @@ public class WebSocketServer {
     @OnError
     public void onError(Session session, Throwable error) {
         log.error("发生错误");
-        //error.printStackTrace();
+        error.printStackTrace();
     }
 
     /**
@@ -109,15 +145,25 @@ public class WebSocketServer {
     /**
      * 群发自定义消息
      */
-    public static void sendInfo(String message, @PathParam("sid") String sid) throws IOException {
-        log.info("推送消息到窗口" + sid + "，推送内容:" + message);
+    public static void sendInfo(String message,String cid, String sid) throws IOException {
+        MessageDao messageDao = new MessageDao();
+        messageDao.setUserId(Integer.valueOf(cid));
+        messageDao.setFlag(true);
+        messageDao.setMessage(message);
+        messageDao.setOnlineCount(webSocketSet.size());
+        log.info("推送消息到窗口" + sid + "，推送内容:" + JSON.toJSONString(messageDao));
+
         for (WebSocketServer item : webSocketSet) {
             try {
+                if (cid.equals(item.sid)) {
+                    log.info("跳过给自己发送消息");
+                    continue;
+                }
                 //这里可以设定只推送给这个sid的，为null则全部推送
                 if (sid == null) {
-                    item.sendMessage(message);
+                    item.sendMessage(JSON.toJSONString(messageDao));
                 } else if (item.sid.equals(sid)) {
-                    item.sendMessage(message);
+                    item.sendMessage(JSON.toJSONString(messageDao));
                 }
             } catch (IOException ignored) {
             }
