@@ -30,6 +30,8 @@ public class UserView {
 
     private String sign;
 
+    private Byte onlineStatus;
+
     public Integer getId() {
         return id;
     }
@@ -116,5 +118,13 @@ public class UserView {
 
     public void setSign(String sign) {
         this.sign = sign;
+    }
+
+    public Byte getOnlineStatus() {
+        return onlineStatus;
+    }
+
+    public void setOnlineStatus(Byte onlineStatus) {
+        this.onlineStatus = onlineStatus;
     }
 }

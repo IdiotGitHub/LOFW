@@ -7,6 +7,7 @@ import com.xiaoxu.error.EmBusinessError;
 import com.xiaoxu.response.CommontReturnType;
 import com.xiaoxu.service.UserService;
 import com.xiaoxu.service.model.UserModel;
+import com.xiaoxu.utils.WebSocketServer;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -83,6 +85,7 @@ public class UserController /*extends BaseController*/ {
             //使用session记录用户登录信息
             httpServletRequest.getSession().setAttribute("isLogin", true);
             httpServletRequest.getSession().setAttribute("loginUser", u);
+
         }
         UserView userView = convertFromUserModel(u);
         return CommontReturnType.create(userView);
@@ -169,9 +172,14 @@ public class UserController /*extends BaseController*/ {
 
     @RequestMapping(value = "/logout", method = RequestMethod.POST)
     @ResponseBody
-    public CommontReturnType logout() {
+    public CommontReturnType logout() throws BusinessException {
         httpServletRequest.getSession().removeAttribute("isLogin");
         httpServletRequest.getSession().removeAttribute("loginUser");
+        UserModel userModel = (UserModel)httpServletRequest.getSession().getAttribute("loginUser");
+        if (userModel == null){
+            throw new BusinessException(EmBusinessError.USER_NOT_LOGIN);
+        }
+        userService.logout(userModel.getId());
         return CommontReturnType.create(null);
     }
 

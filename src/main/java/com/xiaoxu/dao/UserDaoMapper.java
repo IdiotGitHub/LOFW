@@ -80,4 +80,15 @@ public interface UserDaoMapper {
      * @return
      */
     int increaseFans(Integer itemUserId);
+
+    /**
+     * 更新用户登陆状态
+     * @param userId
+     */
+    void userOnline(Integer userId);
+    /**
+     * 更新用户登陆状态
+     * @param userId
+     */
+    void userOffline(Integer userId);
 }

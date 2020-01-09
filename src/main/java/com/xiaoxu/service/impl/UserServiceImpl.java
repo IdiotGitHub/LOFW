@@ -101,7 +101,13 @@ public class UserServiceImpl implements UserService {
         if (!com.alibaba.druid.util.StringUtils.equals(userModel.getUserPassword(), password)) {
             throw new BusinessException(EmBusinessError.USER_LOGIN_ERROR);
         }
+        userDaoMapper.userOnline(userModel.getId());
         return userModel;
+    }
+
+    @Override
+    public void logout(Integer userId) {
+        userDaoMapper.userOffline(userId);
     }
 
     @Override
@@ -122,7 +128,7 @@ public class UserServiceImpl implements UserService {
         Map<String, Object> status = new HashMap<>(3);
         status.put("isLike", likeDaoMapper.selectByUserIdAndItemId(loginUserId, itemId));
         status.put("isFavourite", favouriteDaoMapper.selectByUserIdAndItemId(loginUserId, itemId));
-        status.put("isFollowed",followedDaoMapper.selectByUserIdAndItemUserId(loginUserId,itemUserId));
+        status.put("isFollowed", followedDaoMapper.selectByUserIdAndItemUserId(loginUserId, itemUserId));
         return status;
     }
 
@@ -131,7 +137,7 @@ public class UserServiceImpl implements UserService {
         List<FollowedDao> followedDaoList = followedDaoMapper.selectByUserId(userId);
         List<UserModel> userModelList = new ArrayList<>();
         followedDaoList.forEach(followedDao ->
-                userModelList.add(convertUserModelFromUserDao(userDaoMapper.selectByPrimaryKey(followedDao.getFollowedId()),userId)));
+                userModelList.add(convertUserModelFromUserDao(userDaoMapper.selectByPrimaryKey(followedDao.getFollowedId()), userId)));
         return userModelList;
     }
 
@@ -139,19 +145,20 @@ public class UserServiceImpl implements UserService {
     public List<UserModel> getFans(Integer userId) {
         List<FollowedDao> followedDaoList = followedDaoMapper.selectByFollowedId(userId);
         List<UserModel> userModelList = new ArrayList<>();
-        followedDaoList.forEach(followedDao -> userModelList.add(convertUserModelFromUserDao(userDaoMapper.selectByPrimaryKey(followedDao.getUserId()),userId)));
+        followedDaoList.forEach(followedDao -> userModelList.add(convertUserModelFromUserDao(userDaoMapper.selectByPrimaryKey(followedDao.getUserId()), userId)));
         return userModelList;
     }
 
-    private UserModel convertUserModelFromUserDao(UserDao userDao,Integer userId){
-        if (userDao == null){
+    private UserModel convertUserModelFromUserDao(UserDao userDao, Integer userId) {
+        if (userDao == null) {
             return null;
         }
         UserModel userModel = new UserModel();
-        BeanUtils.copyProperties(userDao,userModel);
-        userModel.setFollowed(followedDaoMapper.selectByUserIdAndItemUserId(userDao.getId(),userId)!=null);
+        BeanUtils.copyProperties(userDao, userModel);
+        userModel.setFollowed(followedDaoMapper.selectByUserIdAndItemUserId(userDao.getId(), userId) != null);
         return userModel;
-}
+    }
+
     private UserDao convertUserDaoFromUserModel(UserModel userModel) {
         if (userModel == null) {
             return null;

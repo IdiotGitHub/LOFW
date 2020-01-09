@@ -20,12 +20,12 @@ public class UserModel {
 
     private String account;
 
-//    @NotBlank(message = "性别不能不填")
+    //    @NotBlank(message = "性别不能不填")
     private Byte gender;
 
     @NotNull(message = "年龄不能为空")
-    @Min(value = 0,message = "年龄不能小于0岁")
-    @Max(value = 200,message = "年龄不能超过200岁")
+    @Min(value = 0, message = "年龄不能小于0岁")
+    @Max(value = 200, message = "年龄不能超过200岁")
     private Integer age;
 
     @NotNull(message = "手机号不能为空")
@@ -53,6 +53,8 @@ public class UserModel {
      * 用户个性签名
      */
     private String sign;
+
+    private Byte onlineStatus;
 
     public Integer getId() {
         return id;
@@ -156,5 +158,13 @@ public class UserModel {
 
     public void setSign(String sign) {
         this.sign = sign;
+    }
+
+    public Byte getOnlineStatus() {
+        return onlineStatus;
+    }
+
+    public void setOnlineStatus(Byte onlineStatus) {
+        this.onlineStatus = onlineStatus;
     }
 }

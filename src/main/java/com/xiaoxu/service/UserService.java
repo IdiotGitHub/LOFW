@@ -21,7 +21,7 @@ public interface UserService {
      */
     UserModel login(String accountOrTelephone, String password) throws BusinessException;
 
-
+    void logout(Integer userId);
     /**
      * 通过用户id获取用户数据
      * @param id
