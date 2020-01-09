@@ -31,7 +31,7 @@
         </javaClientGenerator>
         <!--            generate table and className-->
 
-        <table tableName="user_followed" domainObjectName="FollowedDao"
+        <table tableName="chatting_records" domainObjectName="ChattingRecordsDao"
                enableCountByExample="false" enableDeleteByExample="false"
                enableSelectByExample="false" enableUpdateByExample="false"
                selectByExampleQueryId="false"></table>
