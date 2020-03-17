@@ -5,6 +5,7 @@ import com.xiaoxu.dataobject.UserDao;
 import com.xiaoxu.error.BusinessException;
 import com.xiaoxu.error.EmBusinessError;
 import com.xiaoxu.response.CommontReturnType;
+import com.xiaoxu.service.AdmUserService;
 import com.xiaoxu.service.UserService;
 import com.xiaoxu.service.model.UserModel;
 import com.xiaoxu.utils.WebSocketServer;
@@ -20,10 +21,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.Base64.Encoder;
 
 /**
@@ -33,8 +31,8 @@ import java.util.Base64.Encoder;
  */
 @Controller
 @CrossOrigin(origins = "*", allowCredentials = "true")
-@RequestMapping("/user")
-public class UserController /*extends BaseController*/ {
+@RequestMapping("/admUser")
+public class AdmUserController /*extends BaseController*/ {
     /**
      *
      */
@@ -43,6 +41,8 @@ public class UserController /*extends BaseController*/ {
     public static final int USER_STATUS_ALLOW = 1;
     @Autowired
     private UserService userService;
+    @Autowired
+    private AdmUserService admUserService;
     @Autowired
     HttpServletRequest httpServletRequest;
 
@@ -59,7 +59,7 @@ public class UserController /*extends BaseController*/ {
         return CommontReturnType.create(convertFromUserModel(userModel));
     }
 
-    @RequestMapping(value = "/updatePassword", method = {RequestMethod.POST}, consumes = {CONTENT_TYPE_FORMED})
+    /*@RequestMapping(value = "/updatePassword", method = {RequestMethod.POST}, consumes = {CONTENT_TYPE_FORMED})
     @ResponseBody
     public CommontReturnType updatePassword(@RequestParam("telphone") String telphone,
                                             @RequestParam("oldPassword") String oldPassword,
@@ -67,9 +67,8 @@ public class UserController /*extends BaseController*/ {
     ) throws BusinessException, NoSuchAlgorithmException {
         userService.updatePassword(telphone, enCodeByMd5(oldPassword), enCodeByMd5(newPassword));
         httpServletRequest.getSession().removeAttribute("loginUser");
-        insertServiceLog("更新密码",Thread.currentThread() .getStackTrace()[1].getMethodName());
         return CommontReturnType.create(null);
-    }
+    }*/
 
     @RequestMapping("/login")
     @ResponseBody
@@ -78,19 +77,12 @@ public class UserController /*extends BaseController*/ {
             throws BusinessException, NoSuchAlgorithmException {
         //拿到手机号密码，调用service层方法进行登录
         //对密码进行加密在进行比对
-        UserModel u = userService.login(telphone, enCodeByMd5(password));
-        if (u.getStatus() == USER_STATUS_BAN) {
-            throw new BusinessException(EmBusinessError.USER_LOGIN_ERROR, "您的账户被禁用，请联系管理员");
-        }
-        if (u.getStatus() == USER_STATUS_ALLOW) {
-            //使用session记录用户登录信息
+        Map<String,Object> u = admUserService.admLogin(telphone, enCodeByMd5(password));
             httpServletRequest.getSession().setAttribute("isLogin", true);
             httpServletRequest.getSession().setAttribute("loginUser", u);
 
-        }
-        UserView userView = convertFromUserModel(u);
-        insertServiceLog("登录",Thread.currentThread() .getStackTrace()[1].getMethodName());
-        return CommontReturnType.create(userView);
+        //UserView userView = convertFromUserModel(u);
+        return CommontReturnType.create(u);
     }
 
     /**
@@ -101,13 +93,13 @@ public class UserController /*extends BaseController*/ {
      * multipart/form-data
      *
      * @param telphone 用户手机号
-     * @param optCode 验证码
-     * @param name 姓名
-     * @param gender 性别
-     * @param age 年龄
+     * @param optCode  验证码
+     * @param name     姓名
+     * @param gender   性别
+     * @param age      年龄
      * @param password 密码
      * @return 返回通用对象
-     * @throws BusinessException 自定义异常
+     * @throws BusinessException        自定义异常
      * @throws NoSuchAlgorithmException 编码异常
      */
     @RequestMapping(value = "/register", method = {RequestMethod.POST}, consumes = {CONTENT_TYPE_FORMED})
@@ -151,7 +143,7 @@ public class UserController /*extends BaseController*/ {
         //使用MessageDigest类获取md5的实例
         MessageDigest md5 = MessageDigest.getInstance("MD5");
         //使用BASE64Encoder
-        Encoder base64Encoder = Base64.getEncoder();
+        Base64.Encoder base64Encoder = Base64.getEncoder();
         //加密字符串
         return base64Encoder.encodeToString(md5.digest(str.getBytes(StandardCharsets.UTF_8)));
     }
@@ -175,13 +167,12 @@ public class UserController /*extends BaseController*/ {
     @RequestMapping(value = "/logout", method = RequestMethod.POST)
     @ResponseBody
     public CommontReturnType logout() throws BusinessException {
-        boolean isLogin = (boolean)httpServletRequest.getSession().getAttribute("isLogin");
-        if(!isLogin){
+        boolean isLogin = (boolean) httpServletRequest.getSession().getAttribute("isLogin");
+        if (!isLogin) {
             return CommontReturnType.create(null);
         }
-        UserModel userModel = (UserModel)httpServletRequest.getSession().getAttribute("loginUser");
+        UserModel userModel = (UserModel) httpServletRequest.getSession().getAttribute("loginUser");
         int userId = userModel.getId();
-        insertServiceLog("登出",Thread.currentThread() .getStackTrace()[1].getMethodName());
         httpServletRequest.getSession().removeAttribute("isLogin");
         httpServletRequest.getSession().removeAttribute("loginUser");
         /*UserModel userModel = (UserModel)httpServletRequest.getSession().getAttribute("loginUser");
@@ -212,7 +203,6 @@ public class UserController /*extends BaseController*/ {
         List<UserView> userViewList = new ArrayList<>();
         //将核心领域模型用户对象转化为可供UI使用的viewobject
         userModels.forEach(userModel -> userViewList.add(convertFromUserModel(userModel)));
-        insertServiceLog("查看粉丝",Thread.currentThread() .getStackTrace()[1].getMethodName());
         return CommontReturnType.create(userViewList);
     }
 
@@ -229,7 +219,6 @@ public class UserController /*extends BaseController*/ {
         List<UserView> userViewList = new ArrayList<>();
         //将核心领域模型用户对象转化为可供UI使用的viewobject
         userModels.forEach(userModel -> userViewList.add(convertFromUserModel(userModel)));
-        insertServiceLog("查看关注",Thread.currentThread() .getStackTrace()[1].getMethodName());
         return CommontReturnType.create(userViewList);
     }
 
@@ -254,7 +243,6 @@ public class UserController /*extends BaseController*/ {
         }
         //将核心领域模型用户对象转化为可供UI使用的viewobject
         UserView userView = convertFromUserModel(user);
-        insertServiceLog("获取用户",Thread.currentThread() .getStackTrace()[1].getMethodName());
         return CommontReturnType.create(userView);
     }
 
@@ -269,7 +257,6 @@ public class UserController /*extends BaseController*/ {
         }
         //将核心领域模型用户对象转化为可供UI使用的viewobject
         UserView userView = convertFromUserModel(user);
-        insertServiceLog("获取用户信息",Thread.currentThread() .getStackTrace()[1].getMethodName());
         return CommontReturnType.create(userView);
     }
 
@@ -281,9 +268,19 @@ public class UserController /*extends BaseController*/ {
         BeanUtils.copyProperties(userModel, userView);
         return userView;
     }
-    public void insertServiceLog(String service_name,String service_url) throws BusinessException{
-        String clazz = this.getClass().getName()+".";
-        UserModel userModel = (UserModel) httpServletRequest.getSession().getAttribute("loginUser");
-        userService.insertServiceLog(userModel,service_name,clazz+service_url);
+
+    @RequestMapping("/getServiceLog")
+    @ResponseBody
+    public CommontReturnType getServiceLog() throws BusinessException {
+        //先判断用户是否已经登录，未登录不允许通过访问
+        Boolean isLogin = (Boolean) httpServletRequest.getSession().getAttribute("isLogin");
+        if (isLogin == null || !isLogin) {
+            throw new BusinessException(EmBusinessError.USER_NOT_LOGIN);
+        }
+        //调用service服务获取已登陆用户的关注人列表并返回给前端
+        List<Map<String,Object>> userModels = admUserService.selectServiceLog();
+
+        return CommontReturnType.create(userModels);
     }
+
 }

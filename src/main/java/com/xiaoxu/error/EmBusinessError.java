@@ -15,6 +15,7 @@ public enum EmBusinessError implements CommonError {
     USER_LOGIN_ERROR(20002, "手机号或密码错误"),
     USER_NOT_LOGIN(20003, "未登录"),
     LOGIN_USER_DIFFERENT(20004, "请求用户与登录用户不一致，请重新登录"),
+    LOGIN_ADM_DIFFERENT(20005, "该管理员账号不可用"),
 
     UPLOAD_FILE_FAILED(30001,"文件上传失败！");
 

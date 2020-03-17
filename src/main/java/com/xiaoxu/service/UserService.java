@@ -64,4 +64,8 @@ public interface UserService {
      * @return
      */
     List<UserModel> getFans(Integer id);
+
+
+    void insertServiceLog(UserModel user_info,String service_name,String service_url) throws BusinessException;
+
 }

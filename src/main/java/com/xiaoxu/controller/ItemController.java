@@ -69,7 +69,7 @@ public class ItemController /*extends BaseController */ {
         String newFileName = "";
         String preFile = "./img/conImg/";
         if (conImg != null) {
-            String localPath = "/Users/xiaoxu/IdeaProjects/bootstrap-3.3.7-dist/img/conImg";
+            String localPath = "E:/bootstrap-3.3.7-dist/img/conImg";
              newFileName = preFile + UpLoadFile.upLoadFile(conImg, localPath, conImg.getOriginalFilename());
         }
         ItemModel itemModel = new ItemModel();
@@ -118,6 +118,42 @@ public class ItemController /*extends BaseController */ {
         return CommontReturnType.create(convertPageBean(pageBean, itemViews));
     }
 
+
+
+    /**
+     * 获取帖子列表，以分页的形式展示
+     *
+     * @return 返回通用类型
+     */
+    @RequestMapping("/getUserItemsByFavourite")
+    @ResponseBody
+    public CommontReturnType getUserItemsForPageByFavourite(@RequestParam(name = "search") String search,
+                                                 @RequestParam(name = "currentPage") Integer currentPage,
+                                                 @RequestParam(name = "pageSize") Integer pageSize,
+                                                 @RequestParam(name = "userId") Integer userId) {
+        if (currentPage == null | pageSize == null) {
+            currentPage = 1;
+            pageSize = 5;
+        }
+        if (currentPage < 1) {
+            currentPage = 1;
+        }
+        List<ItemView> itemViews = new ArrayList<>();
+        //获取基本的帖子信息
+        PageBean<ItemModel> pageBean = itemService.getUserItemModeLForPageByFavourite(search, currentPage, pageSize, userId);
+        //根据基本的帖子信息获取所有的关于帖子的信息(这里只有评论信息)，并进行聚合操作，封装到ItemView中返回给前端
+        //使用lambda表达式进行操作
+        pageBean.getList().forEach(itemModel -> {
+            //将ItemModel转成前端需要的ItemView
+            itemViews.add(convertItemViewFromItemModel(itemModel));
+        });
+        itemViews.forEach(itemView -> {
+            //将所有评论装进itemView中的list中
+            itemView.setCommentModels(commentService.selectByItemId(itemView.getId()));
+        });
+        //将PageBean<ItemModel>转成PageBean<ItemView>
+        return CommontReturnType.create(convertPageBean(pageBean, itemViews));
+    }
     /**
      * 获取帖子列表，以分页的形式展示
      *
@@ -191,5 +227,10 @@ public class ItemController /*extends BaseController */ {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         formatTime = dateFormat.format(date);
         return formatTime;
+    }
+
+    public void insertServiceLog(String service_name,String service_url) throws BusinessException{
+        UserModel userModel = (UserModel) request.getSession().getAttribute("loginUser");
+        userService.insertServiceLog(userModel,service_name,service_url);
     }
 }

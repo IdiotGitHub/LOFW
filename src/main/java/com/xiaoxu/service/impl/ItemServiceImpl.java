@@ -73,7 +73,24 @@ public class ItemServiceImpl implements ItemService {
         pageBean.setTotalPages((int) Math.ceil((double) (count) / pageSize));
         return pageBean;
     }
-
+    @Override
+    public PageBean<ItemModel> getUserItemModeLForPageByFavourite(String search, Integer currentPage, Integer pageSize, Integer userId) {
+        PageDao pageDao =  new PageDao(search, (currentPage - 1) * pageSize, pageSize, userId);
+        List<ItemModel> itemModels = new ArrayList<>();
+        PageBean<ItemModel> pageBean = new PageBean<ItemModel>();
+        //int count = itemDaoMapper.selectItemCount(pageDao);
+        List<ItemDao> itemDaos = itemDaoMapper.getUserItemModeLForPageByFavourite(pageDao);
+        int count = itemDaos.size();
+        itemDaos.forEach(item -> {
+            itemModels.add(convertItemModel(item));
+        });
+        pageBean.setCurrentPage(currentPage);
+        pageBean.setPageSize(pageSize);
+        pageBean.setTotalCounts(count);
+        pageBean.setList(itemModels);
+        pageBean.setTotalPages((int) Math.ceil((double) (count) / pageSize));
+        return pageBean;
+    }
     private ItemModel convertItemModel(ItemDao itemDao) {
         if (itemDao == null) {
             return null;

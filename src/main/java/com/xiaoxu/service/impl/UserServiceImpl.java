@@ -15,10 +15,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 在service层不能直接将查询到的对象传到想要该对象的服务
@@ -40,7 +37,8 @@ public class UserServiceImpl implements UserService {
     private FollowedDaoMapper followedDaoMapper;
     @Autowired
     private ValidatorImpl validator;
-
+    @Autowired
+    private AdmUserServiceMapper admUserServiceMapper;
     @Override
     public UserModel getUser(Integer id) {
         //调用userdomapper获取到对应的用户dataobject
@@ -50,6 +48,7 @@ public class UserServiceImpl implements UserService {
             return null;
         }
         UserPasswordDao userPasswordDao = userPasswordDaoMapper.selectByUserId(userDao.getId());
+        String aaa = this.getClass().getName();
         return convertFromDataObject(userDao, userPasswordDao);
     }
 
@@ -190,4 +189,16 @@ public class UserServiceImpl implements UserService {
         return userModel;
     }
 
+    public void insertServiceLog(UserModel user_info,String service_name,String service_url){
+        Map<String,Object> logMap = new HashMap<>();
+        logMap.put("user_id",user_info.getId());
+        logMap.put("user_telephone",user_info.getTelephone());
+        logMap.put("req_info","请求");
+        logMap.put("result_desc","成功");
+        logMap.put("service_url",service_url);
+        logMap.put("service_name",service_name);
+        logMap.put("create_time",new Date(System.currentTimeMillis()));
+
+        admUserServiceMapper.insertServiceLog(logMap);
+    }
 }

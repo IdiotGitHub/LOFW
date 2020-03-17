@@ -35,4 +35,16 @@ public interface ItemService {
      * @return
      */
     PageBean<ItemModel> getUserItemModeLForPage(String search, Integer currentPage, Integer pageSize, Integer userId);
+
+
+    /**
+     * 查询用户收藏的帖子
+     * @param search
+     * @param currentPage
+     * @param pageSize
+     * @param userId
+     * @return
+     */
+    PageBean<ItemModel> getUserItemModeLForPageByFavourite(String search, Integer currentPage, Integer pageSize, Integer userId);
+
 }

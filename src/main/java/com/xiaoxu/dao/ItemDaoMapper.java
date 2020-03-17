@@ -142,4 +142,11 @@ public interface ItemDaoMapper {
      * @return
      */
     List<ItemDao> getUserItemModeLForPage(PageDao pageDao);
+
+    /**
+     * 查询用户收藏的帖子
+     * @param pageDao
+     * @return
+     */
+    List<ItemDao> getUserItemModeLForPageByFavourite(PageDao pageDao);
 }
