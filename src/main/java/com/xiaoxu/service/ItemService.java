@@ -3,6 +3,8 @@ package com.xiaoxu.service;
 import com.xiaoxu.response.PageBean;
 import com.xiaoxu.service.model.ItemModel;
 
+import java.util.List;
+
 /**
  * Created on 2019/11/26 14:53
  *
@@ -47,4 +49,7 @@ public interface ItemService {
      */
     PageBean<ItemModel> getUserItemModeLForPageByFavourite(String search, Integer currentPage, Integer pageSize, Integer userId);
 
+    List<ItemModel> getItems();
+
+    int deleteItemById(Integer itemId);
 }

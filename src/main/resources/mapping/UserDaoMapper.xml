@@ -34,6 +34,12 @@
         from user_info
         where id = #{id,jdbcType=INTEGER}
     </select>
+    <select id="selectAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from user_info
+    </select>
+
     <select id="selectByTelphone" resultMap="BaseResultMap">
         <!--
           WARNING - @mbg.generated
@@ -214,6 +220,18 @@
         fans = #{fans,jdbcType=INTEGER},
         sign = #{fans,jdbcType=VARCHAR},
         online_status = #{onlineStatus,jdbcType=TINYINT},
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateStatus2ByUserId">
+        update user_info
+        set
+        status =  2
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateStatus1ByUserId">
+        update user_info
+        set
+        status =  1
         where id = #{id,jdbcType=INTEGER}
     </update>
     <update id="increaseFollows">

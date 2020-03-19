@@ -201,4 +201,23 @@ public class UserServiceImpl implements UserService {
 
         admUserServiceMapper.insertServiceLog(logMap);
     }
+
+    @Override
+    public List<UserModel> getUsers() {
+        List<UserDao> userDaos = userDaoMapper.selectAll();
+        List<UserModel> userModels = new ArrayList<>();
+        userDaos.forEach(userDao -> {
+            userModels.add(convertUserModelFromUserDao(userDao,userDao.getId()));
+        });
+        return userModels;
+    }
+
+    @Override
+    public int fengHao(Integer userId) {
+        return userDaoMapper.updateStatus2ByUserId(userId);
+    }
+    @Override
+    public int jieFeng(Integer userId) {
+        return userDaoMapper.updateStatus1ByUserId(userId);
+    }
 }

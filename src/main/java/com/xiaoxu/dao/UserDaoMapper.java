@@ -1,6 +1,9 @@
 package com.xiaoxu.dao;
 
+import com.xiaoxu.controller.view.UserView;
 import com.xiaoxu.dataobject.UserDao;
+
+import java.util.List;
 
 public interface UserDaoMapper {
     /**
@@ -91,4 +94,9 @@ public interface UserDaoMapper {
      * @param userId
      */
     void userOffline(Integer userId);
+
+    List<UserDao> selectAll();
+
+    int updateStatus2ByUserId(Integer userId);
+    int updateStatus1ByUserId(Integer userId);
 }

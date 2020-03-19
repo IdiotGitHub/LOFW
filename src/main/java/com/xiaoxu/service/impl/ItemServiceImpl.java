@@ -91,6 +91,22 @@ public class ItemServiceImpl implements ItemService {
         pageBean.setTotalPages((int) Math.ceil((double) (count) / pageSize));
         return pageBean;
     }
+
+    @Override
+    public List<ItemModel> getItems() {
+        List<ItemDao> itemDaos = itemDaoMapper.getItems();
+        List<ItemModel> itemModels = new ArrayList<>();
+        itemDaos.forEach(itemDao -> {
+            itemModels.add(convertItemModel(itemDao));
+        });
+        return itemModels;
+    }
+
+    @Override
+    public int deleteItemById(Integer itemId) {
+        return itemDaoMapper.deleteByPrimaryKey(itemId);
+    }
+
     private ItemModel convertItemModel(ItemDao itemDao) {
         if (itemDao == null) {
             return null;

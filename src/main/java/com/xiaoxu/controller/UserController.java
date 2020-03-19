@@ -184,10 +184,6 @@ public class UserController /*extends BaseController*/ {
         insertServiceLog("登出",Thread.currentThread() .getStackTrace()[1].getMethodName());
         httpServletRequest.getSession().removeAttribute("isLogin");
         httpServletRequest.getSession().removeAttribute("loginUser");
-        /*UserModel userModel = (UserModel)httpServletRequest.getSession().getAttribute("loginUser");
-        if (userModel != null){
-            throw new BusinessException(EmBusinessError.USER_NOT_LOGIN);
-        }*/
         userService.logout(userId);
         return CommontReturnType.create(null);
     }

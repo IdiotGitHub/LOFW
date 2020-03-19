@@ -29,6 +29,7 @@ public class UserView {
     private Boolean isFollowed;
 
     private String sign;
+    private Byte status;
 
     private Byte onlineStatus;
 
@@ -118,6 +119,14 @@ public class UserView {
 
     public void setSign(String sign) {
         this.sign = sign;
+    }
+
+    public Byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(Byte status) {
+        this.status = status;
     }
 
     public Byte getOnlineStatus() {

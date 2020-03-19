@@ -1,5 +1,6 @@
 package com.xiaoxu.dao;
 
+import com.xiaoxu.controller.view.ItemView;
 import com.xiaoxu.dataobject.ItemDao;
 import com.xiaoxu.dataobject.PageDao;
 
@@ -149,4 +150,6 @@ public interface ItemDaoMapper {
      * @return
      */
     List<ItemDao> getUserItemModeLForPageByFavourite(PageDao pageDao);
+
+    List<ItemDao> getItems();
 }

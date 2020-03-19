@@ -68,4 +68,9 @@ public interface UserService {
 
     void insertServiceLog(UserModel user_info,String service_name,String service_url) throws BusinessException;
 
+    List<UserModel> getUsers();
+
+    int fengHao(Integer userId);
+
+    int jieFeng(Integer userId);
 }
