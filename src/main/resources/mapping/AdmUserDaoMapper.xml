@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.xiaoxu.dao.AdmUserServiceMapper">
+<mapper namespace="com.yangyang.dao.AdmUserServiceMapper">
 
     <sql id="Base_Column_List">
         <!--
@@ -64,4 +64,42 @@
         *
         from service_log
     </select>
+
+    <insert id="insertErrorsLog" parameterType="java.util.Map" keyProperty="id" useGeneratedKeys="true">
+        insert into errors_log
+        (
+        id,
+        errors_info,
+        create_time
+        )
+        values
+        (
+        #{id,jdbcType=INTEGER},
+        #{errors_info,jdbcType=LONGVARCHAR},
+        #{create_time,jdbcType=TIMESTAMP}
+        )
+    </insert>
+
+    <select id="selectErrorsLog" resultType="java.util.Map">
+        select
+        *
+        from errors_log
+    </select>
+
+    <insert id="doReport" parameterType="java.util.Map" keyProperty="id" useGeneratedKeys="true">
+        insert into black_list
+        (
+        id,
+        user_id,
+        info,
+        create_time
+        )
+        values
+        (
+        #{id,jdbcType=INTEGER},
+        #{user_id,jdbcType=INTEGER},
+        #{info,jdbcType=LONGVARCHAR},
+        #{create_time,jdbcType=TIMESTAMP}
+        )
+    </insert>
 </mapper>
