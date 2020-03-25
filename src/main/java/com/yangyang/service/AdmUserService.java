@@ -10,5 +10,6 @@ public interface AdmUserService {
     List<Map<String,Object>> selectServiceLog() throws BusinessException;
     void insertErrorsLog(String exception) throws BusinessException;
     List<Map<String,Object>> selectErrorsLog() throws BusinessException;
+    List<Map<String,Object>> getReportList() throws BusinessException;
 
 }

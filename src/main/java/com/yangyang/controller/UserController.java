@@ -1,6 +1,7 @@
 package com.yangyang.controller;
 
 import com.yangyang.controller.view.UserView;
+import com.yangyang.dataobject.UserDao;
 import com.yangyang.error.BusinessException;
 import com.yangyang.error.EmBusinessError;
 import com.yangyang.response.CommontReturnType;
@@ -62,7 +63,7 @@ public class UserController /*extends BaseController*/ {
             e.printStackTrace(PEM);
             String exception = SEM.toString();
             admUserService.insertErrorsLog(exception);
-            return CommontReturnType.create(e);
+            return CommontReturnType.create(e,"0");
         }
     }
 
@@ -103,7 +104,7 @@ public class UserController /*extends BaseController*/ {
             e.printStackTrace(PEM);
             String exception = SEM.toString();
             admUserService.insertErrorsLog(exception);
-            return CommontReturnType.create(e);
+            return CommontReturnType.create(e,"0");
         }
     }
 
@@ -138,10 +139,10 @@ public class UserController /*extends BaseController*/ {
             //在生成otpCode的时候将code存入了session中，此时将其拿出来就可以啦
             //需要注意的是在处理Ajax跨域请求时，session是不可以进行共享的，需要对前后端同时进行Ajax跨域授信
 
-            String inSessionOtpCode = (String) httpServletRequest.getSession().getAttribute(telphone);
+            /*String inSessionOtpCode = (String) httpServletRequest.getSession().getAttribute(telphone);
             if (!com.alibaba.druid.util.StringUtils.equals(optCode, inSessionOtpCode)) {
                 throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "短信验证码不正确");
-            }
+            }*/
             //用户注册流程
             //在userService中添加注册流程方法
             UserModel userModel = new UserModel();
@@ -159,7 +160,7 @@ public class UserController /*extends BaseController*/ {
             e.printStackTrace(PEM);
             String exception = SEM.toString();
             admUserService.insertErrorsLog(exception);
-            return CommontReturnType.create(e);
+            return CommontReturnType.create(e,"0");
         }
     }
 
@@ -212,7 +213,7 @@ public class UserController /*extends BaseController*/ {
             e.printStackTrace(PEM);
             String exception = SEM.toString();
             admUserService.insertErrorsLog(exception);
-            return CommontReturnType.create(e);
+            return CommontReturnType.create(e,"0");
         }
     }
 
@@ -243,7 +244,7 @@ public class UserController /*extends BaseController*/ {
             e.printStackTrace(PEM);
             String exception = SEM.toString();
             admUserService.insertErrorsLog(exception);
-            return CommontReturnType.create(e);
+            return CommontReturnType.create(e,"0");
         }
     }
 
@@ -267,7 +268,7 @@ public class UserController /*extends BaseController*/ {
             e.printStackTrace(PEM);
             String exception = SEM.toString();
             admUserService.insertErrorsLog(exception);
-            return CommontReturnType.create(e);
+            return CommontReturnType.create(e,"0");
         }
     }
 
@@ -299,7 +300,7 @@ public class UserController /*extends BaseController*/ {
             e.printStackTrace(PEM);
             String exception = SEM.toString();
             admUserService.insertErrorsLog(exception);
-            return CommontReturnType.create(e);
+            return CommontReturnType.create(e,"0");
         }
     }
 
@@ -321,7 +322,7 @@ public class UserController /*extends BaseController*/ {
             e.printStackTrace(PEM);
             String exception = SEM.toString();
             admUserService.insertErrorsLog(exception);
-            return CommontReturnType.create(e);
+            return CommontReturnType.create(e,"0");
         }
     }
 
@@ -349,7 +350,7 @@ public class UserController /*extends BaseController*/ {
 
     @RequestMapping("/doReport")
     @ResponseBody
-    public CommontReturnType doReport(@RequestParam("userId") Integer userId, @RequestParam("info") String info) throws BusinessException {
+    public CommontReturnType doReport(@RequestParam("userId") Integer userId, @RequestParam("info") String info, @RequestParam("status") String status) throws BusinessException {
         try {
             //先判断用户是否已经登录，未登录不允许通过访问
             Boolean isLogin = (Boolean) httpServletRequest.getSession().getAttribute("isLogin");
@@ -359,17 +360,41 @@ public class UserController /*extends BaseController*/ {
             Map<String, Object> rp = new HashMap<>();
             rp.put("user_id", userId);
             rp.put("info", info);
+            rp.put("status", status);
             rp.put("create_time", new Date(System.currentTimeMillis()));
             userService.doReport(rp);
             insertServiceLog("举报用户", Thread.currentThread().getStackTrace()[1].getMethodName());
-            return CommontReturnType.create("举报成功");
+            return CommontReturnType.create("操作成功");
         } catch (Exception e) {
             e.printStackTrace(PEM);
             String exception = SEM.toString();
             admUserService.insertErrorsLog(exception);
-            return CommontReturnType.create(e);
+            return CommontReturnType.create(e,"0");
         }
     }
 
+    @RequestMapping("/doReport2")
+    @ResponseBody
+    public CommontReturnType doReport2(@RequestParam("phone") String phone, @RequestParam("info") String info, @RequestParam("status") String status) throws BusinessException {
+        try {
+            UserDao userInfo = userService.getUserByPhone(phone);
+            if(userInfo==null){
+                throw new BusinessException(EmBusinessError.USER_NOT_EXIST);
+            }
+            Map<String, Object> rp = new HashMap<>();
+            rp.put("user_id", userInfo.getId());
+            rp.put("info", info);
+            rp.put("status", status);
+            rp.put("create_time", new Date(System.currentTimeMillis()));
+            userService.doReport(rp);
+            insertServiceLog("举报用户", Thread.currentThread().getStackTrace()[1].getMethodName());
+            return CommontReturnType.create("操作成功");
+        } catch (Exception e) {
+            e.printStackTrace(PEM);
+            String exception = SEM.toString();
+            admUserService.insertErrorsLog(exception);
+            return CommontReturnType.create(e,"0");
+        }
+    }
 
 }

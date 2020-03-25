@@ -1,9 +1,12 @@
 package com.yangyang.dao;
 
+import com.sun.corba.se.spi.ior.ObjectKey;
 import com.yangyang.dataobject.UserDao;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
+
 @Repository("com.yangyang.dao.UserDaoMapper")
 public interface UserDaoMapper {
     /**
@@ -99,4 +102,7 @@ public interface UserDaoMapper {
 
     int updateStatus2ByUserId(Integer userId);
     int updateStatus1ByUserId(Integer userId);
+
+    public Map<String,Object> getUserByPhone(String phone);
+
 }

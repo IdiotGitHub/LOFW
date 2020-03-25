@@ -20,5 +20,6 @@ public interface AdmUserServiceMapper {
 
     List<Map<String,Object>> selectErrorsLog();
     void doReport(Map record);
+    List<Map<String,Object>> getReportList();
 
 }

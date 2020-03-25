@@ -92,14 +92,28 @@
         id,
         user_id,
         info,
-        create_time
+        create_time,
+        status
         )
         values
         (
         #{id,jdbcType=INTEGER},
         #{user_id,jdbcType=INTEGER},
         #{info,jdbcType=LONGVARCHAR},
-        #{create_time,jdbcType=TIMESTAMP}
+        #{create_time,jdbcType=TIMESTAMP},
+        #{status,jdbcType=VARCHAR}
         )
     </insert>
+
+    <select id="getReportList" resultType="java.util.Map">
+        select
+        bl.id,
+        bl.user_id,
+        bl.info,
+        bl.create_time,
+        ui.status
+        from black_list bl
+        left join user_info ui
+        on bl.user_id = ui.id
+    </select>
 </mapper>

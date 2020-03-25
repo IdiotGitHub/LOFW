@@ -270,4 +270,10 @@
         online_status = 2
         where id = #{userId,jdbcType=INTEGER}
     </update>
+    <select id="getUserByPhone" resultType="java.util.Map">
+        select
+        *
+        from user_info
+        where telephone = #{phone,jdbcType=VARCHAR}
+    </select>
 </mapper>

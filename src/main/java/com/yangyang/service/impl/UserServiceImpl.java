@@ -227,4 +227,9 @@ public class UserServiceImpl implements UserService {
     public void doReport(Map rp){
         admUserServiceMapper.doReport(rp);
     }
+
+    public UserDao getUserByPhone(String phone){
+        UserDao userDao = userDaoMapper.selectByTelphone(phone);
+        return  userDao;
+    }
 }

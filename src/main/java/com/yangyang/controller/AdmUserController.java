@@ -63,13 +63,13 @@ public class AdmUserController /*extends BaseController*/ {
                 userModel = (UserModel) session.getAttribute("loginUser");
                 return CommontReturnType.create(convertFromUserModel(userModel));
             } else {
-                return CommontReturnType.create(1, "fail");
+                throw new BusinessException(EmBusinessError.USER_NOT_LOGIN);
             }
         }catch (Exception e) {
             e.printStackTrace(PEM);
             String exception = SEM.toString();
             admUserService.insertErrorsLog(exception);
-            return CommontReturnType.create(e);
+            return CommontReturnType.create(e,"0");
         }
 
     }
@@ -92,7 +92,7 @@ public class AdmUserController /*extends BaseController*/ {
             e.printStackTrace(PEM);
             String exception = SEM.toString();
             admUserService.insertErrorsLog(exception);
-            return CommontReturnType.create(e);
+            return CommontReturnType.create(e,"0");
         }
     }
 
@@ -116,7 +116,7 @@ public class AdmUserController /*extends BaseController*/ {
         try {
             boolean isLogin = (boolean) httpServletRequest.getSession().getAttribute("isLogin");
             if (!isLogin) {
-                return CommontReturnType.create(null);
+                throw new BusinessException(EmBusinessError.USER_NOT_LOGIN);
             }
             UserModel userModel = (UserModel) httpServletRequest.getSession().getAttribute("loginUser");
             int userId = userModel.getId();
@@ -132,7 +132,7 @@ public class AdmUserController /*extends BaseController*/ {
             e.printStackTrace(PEM);
             String exception = SEM.toString();
             admUserService.insertErrorsLog(exception);
-            return CommontReturnType.create(e);
+            return CommontReturnType.create(e,"0");
         }
     }
 
@@ -154,7 +154,7 @@ public class AdmUserController /*extends BaseController*/ {
             }
             //判断请求id是否为当前登录用户
             if (!user.getId().equals(loginUser.getId())) {
-                throw new BusinessException(EmBusinessError.USER_LOGIN_ERROR, "请求信息错误，请重新登录！");
+                throw new BusinessException(EmBusinessError.LOGIN_USER_DIFFERENT);
             }
             //将核心领域模型用户对象转化为可供UI使用的viewobject
             UserView userView = convertFromUserModel(user);
@@ -163,13 +163,18 @@ public class AdmUserController /*extends BaseController*/ {
             e.printStackTrace(PEM);
             String exception = SEM.toString();
             admUserService.insertErrorsLog(exception);
-            return CommontReturnType.create(e);
+            return CommontReturnType.create(e,"0");
         }
     }
     @RequestMapping("/getUsers")
     @ResponseBody
     public CommontReturnType getUsers()  throws BusinessException {
         try {
+            //先判断用户是否已经登录，未登录不允许通过访问
+            Boolean isLogin = (Boolean) httpServletRequest.getSession().getAttribute("isLogin");
+            if (isLogin == null || !isLogin) {
+                throw new BusinessException(EmBusinessError.USER_NOT_LOGIN);
+            }
             List<UserModel> users = userService.getUsers();
             List<UserView> userViewList = new ArrayList<>();
             users.forEach(userModel -> {
@@ -180,13 +185,18 @@ public class AdmUserController /*extends BaseController*/ {
             e.printStackTrace(PEM);
             String exception = SEM.toString();
             admUserService.insertErrorsLog(exception);
-            return CommontReturnType.create(e);
+            return CommontReturnType.create(e,"0");
         }
     }
     @RequestMapping("/getItems")
     @ResponseBody
     public CommontReturnType getItems()  throws BusinessException {
         try {
+            //先判断用户是否已经登录，未登录不允许通过访问
+            Boolean isLogin = (Boolean) httpServletRequest.getSession().getAttribute("isLogin");
+            if (isLogin == null || !isLogin) {
+                throw new BusinessException(EmBusinessError.USER_NOT_LOGIN);
+            }
             List<ItemModel> itemModels = itemService.getItems();
             List<ItemView> itemViews = new ArrayList<>();
             itemModels.forEach(itemModel -> {
@@ -197,7 +207,7 @@ public class AdmUserController /*extends BaseController*/ {
             e.printStackTrace(PEM);
             String exception = SEM.toString();
             admUserService.insertErrorsLog(exception);
-            return CommontReturnType.create(e);
+            return CommontReturnType.create(e,"0");
         }
     }
     @RequestMapping("/deleteItem")
@@ -208,13 +218,13 @@ public class AdmUserController /*extends BaseController*/ {
             if (status == 1) {
                 return CommontReturnType.create(null);
             } else {
-                return CommontReturnType.create(1, "fail");
+                throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR);
             }
         }catch (Exception e) {
             e.printStackTrace(PEM);
             String exception = SEM.toString();
             admUserService.insertErrorsLog(exception);
-            return CommontReturnType.create(e);
+            return CommontReturnType.create(e,"0");
         }
     }
     @RequestMapping("/fengHao")
@@ -225,13 +235,13 @@ public class AdmUserController /*extends BaseController*/ {
             if (status == 1) {
                 return CommontReturnType.create(null);
             } else {
-                return CommontReturnType.create(1, "fail");
+                throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR);
             }
         }catch (Exception e) {
             e.printStackTrace(PEM);
             String exception = SEM.toString();
             admUserService.insertErrorsLog(exception);
-            return CommontReturnType.create(e);
+            return CommontReturnType.create(e,"0");
         }
     }
     @RequestMapping("/jieFeng")
@@ -242,13 +252,13 @@ public class AdmUserController /*extends BaseController*/ {
             if (status == 1) {
                 return CommontReturnType.create(null);
             } else {
-                return CommontReturnType.create(1, "fail");
+                throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR);
             }
         }catch (Exception e) {
         e.printStackTrace(PEM);
         String exception = SEM.toString();
         admUserService.insertErrorsLog(exception);
-        return CommontReturnType.create(e);
+            return CommontReturnType.create(e,"0");
     }
     }
     private ItemView convertItemViewFromItemModel(ItemModel itemModel) {
@@ -294,7 +304,7 @@ public class AdmUserController /*extends BaseController*/ {
             e.printStackTrace(PEM);
             String exception = SEM.toString();
             admUserService.insertErrorsLog(exception);
-            return CommontReturnType.create(e);
+            return CommontReturnType.create(e,"0");
         }
     }
 
@@ -315,7 +325,29 @@ public class AdmUserController /*extends BaseController*/ {
             e.printStackTrace(PEM);
             String exception = SEM.toString();
             admUserService.insertErrorsLog(exception);
-            return CommontReturnType.create(e);
+            return CommontReturnType.create(e,"0");
+        }
+    }
+
+
+    @RequestMapping("/getReportList")
+    @ResponseBody
+    public CommontReturnType getReportList() throws BusinessException {
+        try {
+            //先判断用户是否已经登录，未登录不允许通过访问
+            Boolean isLogin = (Boolean) httpServletRequest.getSession().getAttribute("isLogin");
+            if (isLogin == null || !isLogin) {
+                throw new BusinessException(EmBusinessError.USER_NOT_LOGIN);
+            }
+            //调用service服务获取已登陆用户的关注人列表并返回给前端
+            List<Map<String, Object>> userModels = admUserService.getReportList();
+
+            return CommontReturnType.create(userModels);
+        }catch (Exception e){
+            e.printStackTrace(PEM);
+            String exception = SEM.toString();
+            admUserService.insertErrorsLog(exception);
+            return CommontReturnType.create(e,"0");
         }
     }
 }

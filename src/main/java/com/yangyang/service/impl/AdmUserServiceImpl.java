@@ -94,4 +94,11 @@ public class AdmUserServiceImpl implements AdmUserService {
         return serviceLog;
     }
 
+
+    @Override
+    public List<Map<String,Object>> getReportList() throws BusinessException {
+        List<Map<String,Object>> getReportList = admUserServiceMapper.getReportList();
+        return getReportList;
+    }
+
 }

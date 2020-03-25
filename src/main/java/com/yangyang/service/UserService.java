@@ -1,5 +1,6 @@
 package com.yangyang.service;
 
+import com.yangyang.dataobject.UserDao;
 import com.yangyang.error.BusinessException;
 import com.yangyang.service.model.UserModel;
 
@@ -76,4 +77,5 @@ public interface UserService {
 
     void doReport(Map rp) throws BusinessException;
 
+    UserDao getUserByPhone(String phone);
 }
