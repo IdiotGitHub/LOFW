@@ -124,10 +124,25 @@ public class ItemController /*extends BaseController */ {
                 //将ItemModel转成前端需要的ItemView
                 itemViews.add(convertItemViewFromItemModel(itemModel));
             });
-            itemViews.forEach(itemView -> {
-                //将所有评论装进itemView中的list中
-                itemView.setCommentModels(commentService.selectByItemId(itemView.getId()));
-            });
+            //判断一下前端是否有用户id传过来，有就说明用户已经登陆，反之无
+            Boolean isLogin = (Boolean) request.getSession().getAttribute("isLogin");
+            UserModel loginUser = (UserModel) request.getSession().getAttribute("loginUser");
+            if (isLogin != null && isLogin) {
+                itemViews.forEach(itemView -> {
+                    Map<String, Object> map = userService.selectAction(loginUser.getId(), itemView.getId(), itemView.getUserId());
+                    itemView.setIsFavourite((FavouriteDao) map.get("isFavourite"));
+                    itemView.setIsLike((LikeDao) map.get("isLike"));
+                    itemView.setIsFollowed((FollowedDao) map.get("isFollowed"));
+                    //将所有评论装进itemView中的list中
+                    itemView.setCommentModels(commentService.selectByItemId(itemView.getId()));
+                });
+            } else {
+              /*  itemViews.forEach(itemView -> {
+                    //将所有评论装进itemView中的list中
+                    itemView.setCommentModels(commentService.selectByItemId(itemView.getId()));
+                });*/
+                throw new BusinessException(EmBusinessError.USER_NOT_LOGIN, "error");
+            }
             //将PageBean<ItemModel>转成PageBean<ItemView>
             return CommontReturnType.create(convertPageBean(pageBean, itemViews));
         } catch (Exception e) {
@@ -168,10 +183,25 @@ public class ItemController /*extends BaseController */ {
                 //将ItemModel转成前端需要的ItemView
                 itemViews.add(convertItemViewFromItemModel(itemModel));
             });
-            itemViews.forEach(itemView -> {
-                //将所有评论装进itemView中的list中
-                itemView.setCommentModels(commentService.selectByItemId(itemView.getId()));
-            });
+            //判断一下前端是否有用户id传过来，有就说明用户已经登陆，反之无
+            Boolean isLogin = (Boolean) request.getSession().getAttribute("isLogin");
+            UserModel loginUser = (UserModel) request.getSession().getAttribute("loginUser");
+            if (isLogin != null && isLogin) {
+                itemViews.forEach(itemView -> {
+                    Map<String, Object> map = userService.selectAction(loginUser.getId(), itemView.getId(), itemView.getUserId());
+                    itemView.setIsFavourite((FavouriteDao) map.get("isFavourite"));
+                    itemView.setIsLike((LikeDao) map.get("isLike"));
+                    itemView.setIsFollowed((FollowedDao) map.get("isFollowed"));
+                    //将所有评论装进itemView中的list中
+                    itemView.setCommentModels(commentService.selectByItemId(itemView.getId()));
+                });
+            } else {
+              /*  itemViews.forEach(itemView -> {
+                    //将所有评论装进itemView中的list中
+                    itemView.setCommentModels(commentService.selectByItemId(itemView.getId()));
+                });*/
+                throw new BusinessException(EmBusinessError.USER_NOT_LOGIN, "error");
+            }
             //将PageBean<ItemModel>转成PageBean<ItemView>
             return CommontReturnType.create(convertPageBean(pageBean, itemViews));
         } catch (Exception e) {

@@ -27,20 +27,21 @@ import java.util.*;
 @Service
 public class UserServiceImpl implements UserService {
     @Autowired
-     private UserDaoMapper userDaoMapper;
+    private UserDaoMapper userDaoMapper;
 
     @Autowired
     private UserPasswordDaoMapper userPasswordDaoMapper;
     @Autowired
-     private LikeDaoMapper likeDaoMapper;
+    private LikeDaoMapper likeDaoMapper;
     @Autowired
-     private FavouriteDaoMapper favouriteDaoMapper;
+    private FavouriteDaoMapper favouriteDaoMapper;
     @Autowired
-     private FollowedDaoMapper followedDaoMapper;
+    private FollowedDaoMapper followedDaoMapper;
     @Autowired
     private ValidatorImpl validator;
     @Autowired
-     private AdmUserServiceMapper admUserServiceMapper;
+    private AdmUserServiceMapper admUserServiceMapper;
+
     @Override
     public UserModel getUser(Integer id) {
         //调用userdomapper获取到对应的用户dataobject
@@ -191,15 +192,15 @@ public class UserServiceImpl implements UserService {
         return userModel;
     }
 
-    public void insertServiceLog(UserModel user_info,String service_name,String service_url){
-        Map<String,Object> logMap = new HashMap<>();
-        logMap.put("user_id",user_info.getId());
-        logMap.put("user_telephone",user_info.getTelephone());
-        logMap.put("req_info","请求");
-        logMap.put("result_desc","成功");
-        logMap.put("service_url",service_url);
-        logMap.put("service_name",service_name);
-        logMap.put("create_time",new Date(System.currentTimeMillis()));
+    public void insertServiceLog(UserModel user_info, String service_name, String service_url) {
+        Map<String, Object> logMap = new HashMap<>();
+        logMap.put("user_id", user_info.getId());
+        logMap.put("user_telephone", user_info.getTelephone());
+        logMap.put("req_info", "请求");
+        logMap.put("result_desc", "成功");
+        logMap.put("service_url", service_url);
+        logMap.put("service_name", service_name);
+        logMap.put("create_time", new Date(System.currentTimeMillis()));
 
         admUserServiceMapper.insertServiceLog(logMap);
     }
@@ -209,7 +210,7 @@ public class UserServiceImpl implements UserService {
         List<UserDao> userDaos = userDaoMapper.selectAll();
         List<UserModel> userModels = new ArrayList<>();
         userDaos.forEach(userDao -> {
-            userModels.add(convertUserModelFromUserDao(userDao,userDao.getId()));
+            userModels.add(convertUserModelFromUserDao(userDao, userDao.getId()));
         });
         return userModels;
     }
@@ -218,18 +219,19 @@ public class UserServiceImpl implements UserService {
     public int fengHao(Integer userId) {
         return userDaoMapper.updateStatus2ByUserId(userId);
     }
+
     @Override
     public int jieFeng(Integer userId) {
         return userDaoMapper.updateStatus1ByUserId(userId);
     }
 
 
-    public void doReport(Map rp){
+    public void doReport(Map rp) {
         admUserServiceMapper.doReport(rp);
     }
 
-    public UserDao getUserByPhone(String phone){
+    public UserDao getUserByPhone(String phone) {
         UserDao userDao = userDaoMapper.selectByTelphone(phone);
-        return  userDao;
+        return userDao;
     }
 }
