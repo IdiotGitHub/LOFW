@@ -6,6 +6,7 @@ import com.yangyang.error.BusinessException;
 import com.yangyang.error.EmBusinessError;
 import com.yangyang.response.CommontReturnType;
 import com.yangyang.service.AdmUserService;
+import com.yangyang.service.CommentService;
 import com.yangyang.service.UserService;
 import com.yangyang.service.model.UserModel;
 import org.springframework.beans.BeanUtils;
@@ -37,6 +38,8 @@ public class UserController /*extends BaseController*/ {
      */
     @Autowired
     private AdmUserService admUserService;
+    @Autowired
+    private CommentService commentService;
     public static final String CONTENT_TYPE_FORMED = "application/x-www-form-urlencoded";
     public static final int USER_STATUS_BAN = 2;
     public static final int USER_STATUS_ALLOW = 1;
@@ -49,7 +52,7 @@ public class UserController /*extends BaseController*/ {
 
     @RequestMapping(value = "/isLogin", method = {RequestMethod.POST})
     @ResponseBody
-    public CommontReturnType isLogin()  throws BusinessException{
+    public CommontReturnType isLogin() throws BusinessException {
         try {
             HttpSession session = httpServletRequest.getSession();
             Boolean bool = (Boolean) session.getAttribute("isLogin");
@@ -63,7 +66,7 @@ public class UserController /*extends BaseController*/ {
             e.printStackTrace(PEM);
             String exception = SEM.toString();
             admUserService.insertErrorsLog(exception);
-            return CommontReturnType.create(e,"0");
+            return CommontReturnType.create(e, "0");
         }
     }
 
@@ -104,7 +107,7 @@ public class UserController /*extends BaseController*/ {
             e.printStackTrace(PEM);
             String exception = SEM.toString();
             admUserService.insertErrorsLog(exception);
-            return CommontReturnType.create(e,"0");
+            return CommontReturnType.create(e, "0");
         }
     }
 
@@ -160,7 +163,7 @@ public class UserController /*extends BaseController*/ {
             e.printStackTrace(PEM);
             String exception = SEM.toString();
             admUserService.insertErrorsLog(exception);
-            return CommontReturnType.create(e,"0");
+            return CommontReturnType.create(e, "0");
         }
     }
 
@@ -213,7 +216,7 @@ public class UserController /*extends BaseController*/ {
             e.printStackTrace(PEM);
             String exception = SEM.toString();
             admUserService.insertErrorsLog(exception);
-            return CommontReturnType.create(e,"0");
+            return CommontReturnType.create(e, "0");
         }
     }
 
@@ -244,8 +247,17 @@ public class UserController /*extends BaseController*/ {
             e.printStackTrace(PEM);
             String exception = SEM.toString();
             admUserService.insertErrorsLog(exception);
-            return CommontReturnType.create(e,"0");
+            return CommontReturnType.create(e, "0");
         }
+    }
+
+    @RequestMapping("/submitComment")
+    @ResponseBody
+    public CommontReturnType submitComment(@RequestParam(name = "userId") Integer userId,
+                                           @RequestParam(name = "itemId") Integer itemId,
+                                           @RequestParam(name = "comment") String comment) {
+        commentService.submitComment(userId, itemId, comment);
+        return CommontReturnType.create(null);
     }
 
     @RequestMapping("/getFollows")
@@ -268,7 +280,7 @@ public class UserController /*extends BaseController*/ {
             e.printStackTrace(PEM);
             String exception = SEM.toString();
             admUserService.insertErrorsLog(exception);
-            return CommontReturnType.create(e,"0");
+            return CommontReturnType.create(e, "0");
         }
     }
 
@@ -300,7 +312,7 @@ public class UserController /*extends BaseController*/ {
             e.printStackTrace(PEM);
             String exception = SEM.toString();
             admUserService.insertErrorsLog(exception);
-            return CommontReturnType.create(e,"0");
+            return CommontReturnType.create(e, "0");
         }
     }
 
@@ -322,7 +334,7 @@ public class UserController /*extends BaseController*/ {
             e.printStackTrace(PEM);
             String exception = SEM.toString();
             admUserService.insertErrorsLog(exception);
-            return CommontReturnType.create(e,"0");
+            return CommontReturnType.create(e, "0");
         }
     }
 
@@ -369,7 +381,7 @@ public class UserController /*extends BaseController*/ {
             e.printStackTrace(PEM);
             String exception = SEM.toString();
             admUserService.insertErrorsLog(exception);
-            return CommontReturnType.create(e,"0");
+            return CommontReturnType.create(e, "0");
         }
     }
 
@@ -378,7 +390,7 @@ public class UserController /*extends BaseController*/ {
     public CommontReturnType doReport2(@RequestParam("phone") String phone, @RequestParam("info") String info, @RequestParam("status") String status) throws BusinessException {
         try {
             UserDao userInfo = userService.getUserByPhone(phone);
-            if(userInfo==null){
+            if (userInfo == null) {
                 throw new BusinessException(EmBusinessError.USER_NOT_EXIST);
             }
             Map<String, Object> rp = new HashMap<>();
@@ -393,7 +405,7 @@ public class UserController /*extends BaseController*/ {
             e.printStackTrace(PEM);
             String exception = SEM.toString();
             admUserService.insertErrorsLog(exception);
-            return CommontReturnType.create(e,"0");
+            return CommontReturnType.create(e, "0");
         }
     }
 

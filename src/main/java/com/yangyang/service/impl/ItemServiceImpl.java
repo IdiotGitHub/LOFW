@@ -107,6 +107,14 @@ public class ItemServiceImpl implements ItemService {
         return itemDaoMapper.deleteByPrimaryKey(itemId);
     }
 
+    @Override
+    public void transmit(Integer itemId, Integer userId) {
+        ItemDao itemDao = itemDaoMapper.selectByPrimaryKey(itemId);
+        itemDao.setId(null);
+        itemDao.setUserId(userId);
+        itemDaoMapper.insertSelective(itemDao);
+    }
+
     private ItemModel convertItemModel(ItemDao itemDao) {
         if (itemDao == null) {
             return null;

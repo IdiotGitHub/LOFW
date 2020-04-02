@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -42,6 +43,17 @@ public class CommentServiceImpl implements CommentService {
         });
         return commentModels;
     }
+
+    @Override
+    public void submitComment(Integer userId, Integer itemId, String comment) {
+        CommentDao commentDao = new CommentDao();
+        commentDao.setUserId(userId);
+        commentDao.setItemId(itemId);
+        commentDao.setContext(comment);
+        commentDao.setDatetime(new Date(System.currentTimeMillis()));
+        commentDaoMapper.insertSelective(commentDao);
+    }
+
     private CommentModel convertFromCommentDao(CommentDao commentDao) throws BusinessException {
         if (commentDao == null){
             return null;

@@ -52,4 +52,6 @@ public interface ItemService {
     List<ItemModel> getItems();
 
     int deleteItemById(Integer itemId);
+
+    void transmit(Integer itemId, Integer userId);
 }

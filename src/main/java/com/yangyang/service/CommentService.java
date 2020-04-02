@@ -17,4 +17,6 @@ public interface CommentService {
      * @return
      */
     List<CommentModel> selectByItemId(Integer itemId);
+
+    void submitComment(Integer userId, Integer itemId, String comment);
 }

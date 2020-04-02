@@ -152,7 +152,13 @@ public class ItemController /*extends BaseController */ {
             return CommontReturnType.create(e);
         }
     }
-
+    @RequestMapping("/transmit")
+    @ResponseBody
+    public CommontReturnType transmit(@RequestParam(name = "itemId") Integer itemId,
+                                      @RequestParam(name = "userId") Integer userId) {
+        itemService.transmit(itemId, userId);
+        return CommontReturnType.create(null);
+    }
 
 
     /**
