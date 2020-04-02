@@ -1,6 +1,7 @@
 package com.yangyang.service.impl;
 
 import com.yangyang.dao.CommentDaoMapper;
+import com.yangyang.dao.ItemDaoMapper;
 import com.yangyang.dao.UserDaoMapper;
 import com.yangyang.dataobject.CommentDao;
 import com.yangyang.dataobject.UserDao;
@@ -11,6 +12,7 @@ import com.yangyang.service.model.CommentModel;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -31,6 +33,8 @@ public class CommentServiceImpl implements CommentService {
     CommentDaoMapper commentDaoMapper;
     @Autowired
     UserDaoMapper userDaoMapper;
+    @Autowired
+    ItemDaoMapper itemDaoMapper;
     @Override
     public List<CommentModel> selectByItemId(Integer itemId) {
         List<CommentModel> commentModels = new ArrayList<>();
@@ -45,12 +49,14 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional
     public void submitComment(Integer userId, Integer itemId, String comment) {
         CommentDao commentDao = new CommentDao();
         commentDao.setUserId(userId);
         commentDao.setItemId(itemId);
         commentDao.setContext(comment);
         commentDao.setDatetime(new Date(System.currentTimeMillis()));
+        itemDaoMapper.increaseComment(itemId);
         commentDaoMapper.insertSelective(commentDao);
     }
 
