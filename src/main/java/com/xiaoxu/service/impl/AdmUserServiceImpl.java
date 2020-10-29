@@ -9,6 +9,7 @@ import com.xiaoxu.validator.ValidatorImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.*;
 
 /**
@@ -19,27 +20,13 @@ import java.util.*;
  */
 @Service
 public class AdmUserServiceImpl implements AdmUserService {
-    @Autowired
-    private UserDaoMapper userDaoMapper;
-    @Autowired
+
+    @Resource
     private AdmUserServiceMapper admUserServiceMapper;
-    @Autowired
-    private UserPasswordDaoMapper userPasswordDaoMapper;
-    @Autowired
-    private LikeDaoMapper likeDaoMapper;
-    @Autowired
-    private FavouriteDaoMapper favouriteDaoMapper;
-    @Autowired
-    private FollowedDaoMapper followedDaoMapper;
-    @Autowired
-    private ValidatorImpl validator;
 
-
-
-    //    @Cacheable(value = {"my-redis-cache1"})
     @Override
     public Map<String,Object> admLogin(String account,String password) throws BusinessException {
-        Map admUser = admUserServiceMapper.selectByAccount(account,password);
+        Map<String, Object> admUser = admUserServiceMapper.selectByAccount(account, password);
         //判空，如果userDO为null，抛错
         if (admUser == null) {
             throw new BusinessException(EmBusinessError.USER_LOGIN_ERROR);
@@ -54,33 +41,12 @@ public class AdmUserServiceImpl implements AdmUserService {
         return admUser;
     }
     @Override
-    public List<Map<String,Object>> selectServiceLog() throws BusinessException {
-        List<Map<String,Object>> serviceLog = admUserServiceMapper.selectServiceLog();
-        return serviceLog;
+    public List<Map<String,Object>> selectServiceLog() {
+        return admUserServiceMapper.selectServiceLog();
     }
 
 
-
-    /*@Override
-    public PageBean<Map<String,Object>> getItemModeLForPage(String search, Integer currentPage, Integer pageSize, Integer userId) {
-        *//*PageDao pageDao = null;
-        if (userId == 0){
-            pageDao = new PageDao(search, (currentPage - 1) * pageSize, pageSize, null);
-        }else{
-            pageDao = new PageDao(search, (currentPage - 1) * pageSize, pageSize, userId);
-        }*//*
-        List<Map<String,Object>> logItemList = new ArrayList<>();
-        PageBean<Map<String,Object>> pageBean = new PageBean<Map<String,Object>>();
-       // int count = admUserServiceMapper.selectLogCount(pageDao);
-         List<Map<String,Object>> serviceLog = admUserServiceMapper.selectServiceLog();
-
-        pageBean.setCurrentPage(currentPage);
-        pageBean.setPageSize(pageSize);
-        pageBean.setTotalCounts(10);
-        pageBean.setList(serviceLog);
-        pageBean.setTotalPages((int) Math.ceil((double) (10) / pageSize));
-        return pageBean;
-    }*/
+    @Override
     public void insertErrorsLog(String exception){
         Map<String,Object> error  = new HashMap<>();
         error.put("errors_info",exception);
@@ -89,16 +55,14 @@ public class AdmUserServiceImpl implements AdmUserService {
     }
 
     @Override
-    public List<Map<String,Object>> selectErrorsLog() throws BusinessException {
-        List<Map<String,Object>> serviceLog = admUserServiceMapper.selectErrorsLog();
-        return serviceLog;
+    public List<Map<String,Object>> selectErrorsLog() {
+        return admUserServiceMapper.selectErrorsLog();
     }
 
 
     @Override
-    public List<Map<String,Object>> getReportList() throws BusinessException {
-        List<Map<String,Object>> getReportList = admUserServiceMapper.getReportList();
-        return getReportList;
+    public List<Map<String,Object>> getReportList() {
+        return admUserServiceMapper.getReportList();
     }
 
 }

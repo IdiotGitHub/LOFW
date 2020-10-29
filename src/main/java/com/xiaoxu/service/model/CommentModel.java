@@ -3,8 +3,7 @@ package com.xiaoxu.service.model;
 /**
  * Created on 2019/11/26 14:37
  *
- * @Author Xiaoxu
- * @Version 1.0
+ * @author Xiaoxu
  */
 public class CommentModel {
     private Integer id;

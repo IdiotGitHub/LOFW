@@ -8,41 +8,44 @@ import com.xiaoxu.dataobject.UserDao;
 import com.xiaoxu.response.PageBean;
 import com.xiaoxu.service.ItemService;
 import com.xiaoxu.service.model.ItemModel;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created on 2019/11/26 14:55
  *
- * @Author Xiaoxu
- * @Version 1.0
+ * @author xiaoxu
  */
 @Service
 public class ItemServiceImpl implements ItemService {
-    @Autowired
+    @Resource
     private ItemDaoMapper itemDaoMapper;
-    @Autowired
+    @Resource
     private UserDaoMapper userDaoMapper;
 
     @Override
-    public PageBean<ItemModel> getItemModeLForPage(String search, Integer currentPage, Integer pageSize, Integer userId) {
-        PageDao pageDao = null;
-        if (userId == 0){
+    public PageBean<ItemModel> getItemModelForPage(String search, Integer currentPage, Integer pageSize, Integer userId) {
+        PageDao pageDao;
+        if (userId == 0) {
             pageDao = new PageDao(search, (currentPage - 1) * pageSize, pageSize, null);
-        }else{
+        } else {
             pageDao = new PageDao(search, (currentPage - 1) * pageSize, pageSize, userId);
         }
         List<ItemModel> itemModels = new ArrayList<>();
-        PageBean<ItemModel> pageBean = new PageBean<ItemModel>();
+        PageBean<ItemModel> pageBean = new PageBean<>();
         int count = itemDaoMapper.selectCount(pageDao);
         List<ItemDao> itemDaos = itemDaoMapper.getItemModeLForPage(pageDao);
-        itemDaos.forEach(item -> {
-            itemModels.add(convertItemModel(item));
-        });
+        return getItemModelPageBean(currentPage, pageSize, itemModels, pageBean, count, itemDaos);
+    }
+
+    @NotNull
+    private PageBean<ItemModel> getItemModelPageBean(Integer currentPage, Integer pageSize, List<ItemModel> itemModels, PageBean<ItemModel> pageBean, int count, List<ItemDao> itemDaos) {
+        itemDaos.forEach(item -> itemModels.add(convertItemModel(item)));
         pageBean.setCurrentPage(currentPage);
         pageBean.setPageSize(pageSize);
         pageBean.setTotalCounts(count);
@@ -57,48 +60,30 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public PageBean<ItemModel> getUserItemModeLForPage(String search, Integer currentPage, Integer pageSize, Integer userId) {
-        PageDao pageDao =  new PageDao(search, (currentPage - 1) * pageSize, pageSize, userId);
+    public PageBean<ItemModel> getUserItemModelForPage(String search, Integer currentPage, Integer pageSize, Integer userId) {
+        PageDao pageDao = new PageDao(search, (currentPage - 1) * pageSize, pageSize, userId);
         List<ItemModel> itemModels = new ArrayList<>();
-        PageBean<ItemModel> pageBean = new PageBean<ItemModel>();
+        PageBean<ItemModel> pageBean = new PageBean<>();
         int count = itemDaoMapper.selectItemCount(pageDao);
         List<ItemDao> itemDaos = itemDaoMapper.getUserItemModeLForPage(pageDao);
-        itemDaos.forEach(item -> {
-            itemModels.add(convertItemModel(item));
-        });
-        pageBean.setCurrentPage(currentPage);
-        pageBean.setPageSize(pageSize);
-        pageBean.setTotalCounts(count);
-        pageBean.setList(itemModels);
-        pageBean.setTotalPages((int) Math.ceil((double) (count) / pageSize));
-        return pageBean;
+        return getItemModelPageBean(currentPage, pageSize, itemModels, pageBean, count, itemDaos);
     }
+
     @Override
-    public PageBean<ItemModel> getUserItemModeLForPageByFavourite(String search, Integer currentPage, Integer pageSize, Integer userId) {
-        PageDao pageDao =  new PageDao(search, (currentPage - 1) * pageSize, pageSize, userId);
+    public PageBean<ItemModel> getUserItemModelForPageByFavourite(String search, Integer currentPage, Integer pageSize, Integer userId) {
+        PageDao pageDao = new PageDao(search, (currentPage - 1) * pageSize, pageSize, userId);
         List<ItemModel> itemModels = new ArrayList<>();
-        PageBean<ItemModel> pageBean = new PageBean<ItemModel>();
-        //int count = itemDaoMapper.selectItemCount(pageDao);
+        PageBean<ItemModel> pageBean = new PageBean<>();
         List<ItemDao> itemDaos = itemDaoMapper.getUserItemModeLForPageByFavourite(pageDao);
         int count = itemDaos.size();
-        itemDaos.forEach(item -> {
-            itemModels.add(convertItemModel(item));
-        });
-        pageBean.setCurrentPage(currentPage);
-        pageBean.setPageSize(pageSize);
-        pageBean.setTotalCounts(count);
-        pageBean.setList(itemModels);
-        pageBean.setTotalPages((int) Math.ceil((double) (count) / pageSize));
-        return pageBean;
+        return getItemModelPageBean(currentPage, pageSize, itemModels, pageBean, count, itemDaos);
     }
 
     @Override
     public List<ItemModel> getItems() {
         List<ItemDao> itemDaos = itemDaoMapper.getItems();
         List<ItemModel> itemModels = new ArrayList<>();
-        itemDaos.forEach(itemDao -> {
-            itemModels.add(convertItemModel(itemDao));
-        });
+        itemDaos.forEach(itemDao -> itemModels.add(convertItemModel(itemDao)));
         return itemModels;
     }
 
@@ -129,7 +114,7 @@ public class ItemServiceImpl implements ItemService {
 
     private ItemDao convertItemDao(ItemModel itemModel) {
         ItemDao itemDao = new ItemDao();
-        BeanUtils.copyProperties(itemModel,itemDao);
+        BeanUtils.copyProperties(itemModel, itemDao);
         return itemDao;
     }
 }

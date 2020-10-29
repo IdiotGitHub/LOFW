@@ -231,7 +231,7 @@ public class AdmUserController /*extends BaseController*/ {
     @ResponseBody
     public CommonReturnType fengHao(@RequestParam(name = "userId" ) Integer userId) throws BusinessException  {
         try {
-            int status = userService.fengHao(userId);
+            int status = userService.recoverAccount(userId);
             if (status == 1) {
                 return CommonReturnType.create(null);
             } else {
@@ -248,7 +248,7 @@ public class AdmUserController /*extends BaseController*/ {
     @ResponseBody
     public CommonReturnType jieFeng(@RequestParam(name = "userId" ) Integer userId) throws BusinessException  {
         try {
-            int status = userService.jieFeng(userId);
+            int status = userService.banAccount(userId);
             if (status == 1) {
                 return CommonReturnType.create(null);
             } else {

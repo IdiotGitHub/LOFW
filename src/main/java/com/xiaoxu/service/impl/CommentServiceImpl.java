@@ -10,10 +10,10 @@ import com.xiaoxu.error.EmBusinessError;
 import com.xiaoxu.service.CommentService;
 import com.xiaoxu.service.model.CommentModel;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,17 +23,17 @@ import java.util.List;
 /**
  * Created on 2019/11/26 15:38
  *
- * @Author Xiaoxu
- * @Version 1.0
+ * @author xiaoxu
  */
 @Service
 public class CommentServiceImpl implements CommentService {
-    @Autowired
+    @Resource
     CommentDaoMapper commentDaoMapper;
-    @Autowired
+    @Resource
     UserDaoMapper userDaoMapper;
-    @Autowired
+    @Resource
     ItemDaoMapper itemDaoMapper;
+
     @Override
     public List<CommentModel> selectByItemId(Integer itemId) {
         List<CommentModel> commentModels = new ArrayList<>();
@@ -48,7 +48,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = {Exception.class})
     public void submitComment(Integer userId, Integer itemId, String comment) {
         CommentDao commentDao = new CommentDao();
         commentDao.setUserId(userId);
@@ -60,13 +60,13 @@ public class CommentServiceImpl implements CommentService {
     }
 
     private CommentModel convertFromCommentDao(CommentDao commentDao) throws BusinessException {
-        if (commentDao == null){
+        if (commentDao == null) {
             return null;
         }
         CommentModel commentModel = new CommentModel();
-        BeanUtils.copyProperties(commentDao,commentModel);
+        BeanUtils.copyProperties(commentDao, commentModel);
         UserDao userDao = userDaoMapper.selectByPrimaryKey(commentDao.getUserId());
-        if (userDao == null){
+        if (userDao == null) {
             throw new BusinessException(EmBusinessError.UNKNOWN_ERROR);
         }
         commentModel.setUserName(userDao.getName());
@@ -74,10 +74,9 @@ public class CommentServiceImpl implements CommentService {
         commentModel.setDatetime(getFormatTime(commentDao.getDatetime()));
         return commentModel;
     }
-    private String getFormatTime(Date date){
-        String formatTime = null;
+
+    private String getFormatTime(Date date) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        formatTime = dateFormat.format(date);
-        return formatTime;
+        return dateFormat.format(date);
     }
 }

@@ -5,8 +5,7 @@ import java.util.Date;
 /**
  * Created on 2019/11/26 14:25
  *
- * @Author Xiaoxu
- * @Version 1.0
+ * @author Xiaoxu
  * 根据这些属性就可以查询所有有关此文章的所有信息，在view层进行聚合操作，将前端所需展现的信息进行聚合
  */
 public class ItemModel {

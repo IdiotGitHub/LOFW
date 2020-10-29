@@ -1,10 +1,10 @@
 package com.xiaoxu.controller;
 
 import com.xiaoxu.service.FollowService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,7 +15,7 @@ import java.util.Map;
 @CrossOrigin(origins = "*" , allowCredentials = "true")
 @RequestMapping("/follow")
 public class FollowController {
-    @Autowired
+    @Resource
     private FollowService followService;
     @RequestMapping(value = "/doFollow" ,method = {RequestMethod.POST})
     @ResponseBody

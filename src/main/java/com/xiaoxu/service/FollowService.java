@@ -7,31 +7,35 @@ import java.util.List;
  */
 public interface FollowService {
     /**
-     * 查询收藏状态
-     * @param userId
-     * @param itemUserId
-     * @return
+     * 查询关注状态
+     *
+     * @param userId     用户id
+     * @param itemUserId 发表该贴用户id
+     * @return 关注状态
      */
     boolean selectFollowStatus(Integer userId, Integer itemUserId);
 
     /**
-     * 取消收藏
-     * @param user
-     * @param itemUserId
+     * 取消关注
+     *
+     * @param userId     用户id
+     * @param itemUserId 发表该贴用户id
      */
-    void cancelFollow(Integer user, Integer itemUserId);
+    void cancelFollow(Integer userId, Integer itemUserId);
 
     /**
-     * 收藏
-     * @param userId
-     * @param itemUserId
+     * 关注
+     *
+     * @param userId     用户id
+     * @param itemUserId 发表该贴用户
      */
     void doFollow(Integer userId, Integer itemUserId);
 
     /**
      * 根据发布动态的id查询关注的用户ID
-     * @param userId
-     * @return
+     *
+     * @param userId 用户id
+     * @return 关注用户id列表
      */
     List<Integer> selectUserId(Integer userId);
 }

@@ -21,6 +21,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -34,26 +35,24 @@ import java.util.Map;
 /**
  * Created on 2019/11/26 14:48
  *
- * @Author Xiaoxu
- *
+ * @author Xiaoxu
  */
 @Controller
 @RequestMapping("/item")
-@CrossOrigin(origins = "*", allowCredentials = "true"/*, allowedHeaders = "Access-Control-Allow-Origin: *"*/)
-public class ItemController /*extends BaseController */ {
-    public static final String CONTENT_TYPE_FORMED = "application/x-www-form-urlencoded";
-    StringWriter SEM = new StringWriter();
-    PrintWriter PEM = new PrintWriter(SEM);
-    @Autowired
+@CrossOrigin(origins = "*", allowCredentials = "true")
+public class ItemController extends BaseController {
+
+    @Resource
     private ItemService itemService;
-    @Autowired
+    @Resource
     private CommentService commentService;
-    @Autowired
+    @Resource
     private UserService userService;
-    @Autowired
+    @Resource
     private HttpServletRequest request;
-    @Autowired
+    @Resource
     private AdmUserService admUserService;
+
     @RequestMapping(value = "createItem", method = RequestMethod.POST)
     @ResponseBody
     public CommonReturnType createItem(@RequestParam(name = "context") String context,
@@ -64,7 +63,6 @@ public class ItemController /*extends BaseController */ {
     先判断是否登录
     未登录先登录
      */
-    try {
         Boolean isLogin = (Boolean) request.getSession().getAttribute("isLogin");
         if (isLogin == null) {
             throw new BusinessException(EmBusinessError.USER_NOT_LOGIN);
@@ -88,12 +86,6 @@ public class ItemController /*extends BaseController */ {
         itemService.createItem(itemModel);
         ItemView itemView = convertItemViewFromItemModel(itemModel);
         return CommonReturnType.create(itemView);
-    } catch (Exception e) {
-        e.printStackTrace(PEM);
-        String exception = SEM.toString();
-        admUserService.insertErrorsLog(exception);
-        return CommonReturnType.create(e);
-    }
     }
 
     /**
@@ -107,51 +99,34 @@ public class ItemController /*extends BaseController */ {
                                                 @RequestParam(name = "currentPage") Integer currentPage,
                                                 @RequestParam(name = "pageSize") Integer pageSize,
                                                 @RequestParam(name = "userId") Integer userId) throws BusinessException {
-        try {
-            if (currentPage == null | pageSize == null) {
-                currentPage = 1;
-                pageSize = 5;
-            }
-            if (currentPage < 1) {
-                currentPage = 1;
-            }
-            List<ItemView> itemViews = new ArrayList<>();
-            //获取基本的帖子信息
-            PageBean<ItemModel> pageBean = itemService.getUserItemModeLForPage(search, currentPage, pageSize, userId);
-            //根据基本的帖子信息获取所有的关于帖子的信息(这里只有评论信息)，并进行聚合操作，封装到ItemView中返回给前端
-            //使用lambda表达式进行操作
-            pageBean.getList().forEach(itemModel -> {
-                //将ItemModel转成前端需要的ItemView
-                itemViews.add(convertItemViewFromItemModel(itemModel));
-            });
-            //判断一下前端是否有用户id传过来，有就说明用户已经登陆，反之无
-            Boolean isLogin = (Boolean) request.getSession().getAttribute("isLogin");
-            UserModel loginUser = (UserModel) request.getSession().getAttribute("loginUser");
-            if (isLogin != null && isLogin) {
-                itemViews.forEach(itemView -> {
-                    Map<String, Object> map = userService.selectAction(loginUser.getId(), itemView.getId(), itemView.getUserId());
-                    itemView.setIsFavourite((FavouriteDao) map.get("isFavourite"));
-                    itemView.setIsLike((LikeDao) map.get("isLike"));
-                    itemView.setIsFollowed((FollowedDao) map.get("isFollowed"));
-                    //将所有评论装进itemView中的list中
-                    itemView.setCommentModels(commentService.selectByItemId(itemView.getId()));
-                });
-            } else {
-              /*  itemViews.forEach(itemView -> {
-                    //将所有评论装进itemView中的list中
-                    itemView.setCommentModels(commentService.selectByItemId(itemView.getId()));
-                });*/
-                throw new BusinessException(EmBusinessError.USER_NOT_LOGIN, "error");
-            }
-            //将PageBean<ItemModel>转成PageBean<ItemView>
-            return CommonReturnType.create(convertPageBean(pageBean, itemViews));
-        } catch (Exception e) {
-            e.printStackTrace(PEM);
-            String exception = SEM.toString();
-            admUserService.insertErrorsLog(exception);
-            return CommonReturnType.create(e);
+        if (currentPage == null | pageSize == null) {
+            currentPage = 1;
+            pageSize = 5;
         }
+        if (currentPage < 1) {
+            currentPage = 1;
+        }
+        List<ItemView> itemViews = new ArrayList<>();
+        //获取基本的帖子信息
+        PageBean<ItemModel> pageBean = itemService.getUserItemModelForPage(search, currentPage, pageSize, userId);
+        //根据基本的帖子信息获取所有的关于帖子的信息(这里只有评论信息)，并进行聚合操作，封装到ItemView中返回给前端
+        //使用lambda表达式进行操作
+        pageBean.getList().forEach(itemModel -> {
+            //将ItemModel转成前端需要的ItemView
+            itemViews.add(convertItemViewFromItemModel(itemModel));
+        });
+        //判断一下前端是否有用户id传过来，有就说明用户已经登陆，反之无
+        Boolean isLogin = (Boolean) request.getSession().getAttribute("isLogin");
+        UserModel loginUser = (UserModel) request.getSession().getAttribute("loginUser");
+        if (isLogin != null && isLogin) {
+            getLoginItemViews(itemViews, loginUser);
+        } else {
+            throw new BusinessException(EmBusinessError.USER_NOT_LOGIN, "error");
+        }
+        //将PageBean<ItemModel>转成PageBean<ItemView>
+        return CommonReturnType.create(convertPageBean(pageBean, itemViews));
     }
+
     @RequestMapping("/transmit")
     @ResponseBody
     public CommonReturnType transmit(@RequestParam(name = "itemId") Integer itemId,
@@ -172,51 +147,34 @@ public class ItemController /*extends BaseController */ {
                                                            @RequestParam(name = "currentPage") Integer currentPage,
                                                            @RequestParam(name = "pageSize") Integer pageSize,
                                                            @RequestParam(name = "userId") Integer userId) throws BusinessException {
-        try {
-            if (currentPage == null | pageSize == null) {
-                currentPage = 1;
-                pageSize = 5;
-            }
-            if (currentPage < 1) {
-                currentPage = 1;
-            }
-            List<ItemView> itemViews = new ArrayList<>();
-            //获取基本的帖子信息
-            PageBean<ItemModel> pageBean = itemService.getUserItemModeLForPageByFavourite(search, currentPage, pageSize, userId);
-            //根据基本的帖子信息获取所有的关于帖子的信息(这里只有评论信息)，并进行聚合操作，封装到ItemView中返回给前端
-            //使用lambda表达式进行操作
-            pageBean.getList().forEach(itemModel -> {
-                //将ItemModel转成前端需要的ItemView
-                itemViews.add(convertItemViewFromItemModel(itemModel));
-            });
-            //判断一下前端是否有用户id传过来，有就说明用户已经登陆，反之无
-            Boolean isLogin = (Boolean) request.getSession().getAttribute("isLogin");
-            UserModel loginUser = (UserModel) request.getSession().getAttribute("loginUser");
-            if (isLogin != null && isLogin) {
-                itemViews.forEach(itemView -> {
-                    Map<String, Object> map = userService.selectAction(loginUser.getId(), itemView.getId(), itemView.getUserId());
-                    itemView.setIsFavourite((FavouriteDao) map.get("isFavourite"));
-                    itemView.setIsLike((LikeDao) map.get("isLike"));
-                    itemView.setIsFollowed((FollowedDao) map.get("isFollowed"));
-                    //将所有评论装进itemView中的list中
-                    itemView.setCommentModels(commentService.selectByItemId(itemView.getId()));
-                });
-            } else {
-              /*  itemViews.forEach(itemView -> {
-                    //将所有评论装进itemView中的list中
-                    itemView.setCommentModels(commentService.selectByItemId(itemView.getId()));
-                });*/
-                throw new BusinessException(EmBusinessError.USER_NOT_LOGIN, "error");
-            }
-            //将PageBean<ItemModel>转成PageBean<ItemView>
-            return CommonReturnType.create(convertPageBean(pageBean, itemViews));
-        } catch (Exception e) {
-            e.printStackTrace(PEM);
-            String exception = SEM.toString();
-            admUserService.insertErrorsLog(exception);
-            return CommonReturnType.create(e);
+        if (currentPage == null | pageSize == null) {
+            currentPage = 1;
+            pageSize = 5;
         }
+        if (currentPage < 1) {
+            currentPage = 1;
+        }
+        List<ItemView> itemViews = new ArrayList<>();
+        //获取基本的帖子信息
+        PageBean<ItemModel> pageBean = itemService.getUserItemModelForPageByFavourite(search, currentPage, pageSize, userId);
+        //根据基本的帖子信息获取所有的关于帖子的信息(这里只有评论信息)，并进行聚合操作，封装到ItemView中返回给前端
+        //使用lambda表达式进行操作
+        pageBean.getList().forEach(itemModel -> {
+            //将ItemModel转成前端需要的ItemView
+            itemViews.add(convertItemViewFromItemModel(itemModel));
+        });
+        //判断一下前端是否有用户id传过来，有就说明用户已经登陆，反之无
+        Boolean isLogin = (Boolean) request.getSession().getAttribute("isLogin");
+        UserModel loginUser = (UserModel) request.getSession().getAttribute("loginUser");
+        if (isLogin != null && isLogin) {
+            getLoginItemViews(itemViews, loginUser);
+        } else {
+            throw new BusinessException(EmBusinessError.USER_NOT_LOGIN, "error");
+        }
+        //将PageBean<ItemModel>转成PageBean<ItemView>
+        return CommonReturnType.create(convertPageBean(pageBean, itemViews));
     }
+
     /**
      * 获取帖子列表，以分页的形式展示
      *
@@ -228,51 +186,47 @@ public class ItemController /*extends BaseController */ {
                                             @RequestParam(name = "currentPage") Integer currentPage,
                                             @RequestParam(name = "pageSize") Integer pageSize,
                                             @RequestParam(name = "userId") Integer userId) throws BusinessException {
-        try {
-            //userId等于0要不就是未登陆，要不就是加载广场，所以不用管是哪种情况，直接加载广场页面就可以了
-            if (currentPage == null | pageSize == null) {
-                currentPage = 1;
-                pageSize = 5;
-            }
-            if (currentPage < 1) {
-                currentPage = 1;
-            }
-            List<ItemView> itemViews = new ArrayList<>();
-            //获取基本的帖子信息
-            PageBean<ItemModel> pageBean = itemService.getItemModeLForPage(search, currentPage, pageSize, userId);
-            //根据基本的帖子信息获取所有的关于帖子的信息(这里只有评论信息)，并进行聚合操作，封装到ItemView中返回给前端
-            //使用lambda表达式进行操作
-            pageBean.getList().forEach(itemModel -> {
-                //将ItemModel转成前端需要的ItemView
-                itemViews.add(convertItemViewFromItemModel(itemModel));
-            });
-            //判断一下前端是否有用户id传过来，有就说明用户已经登陆，反之无
-            Boolean isLogin = (Boolean) request.getSession().getAttribute("isLogin");
-            UserModel loginUser = (UserModel) request.getSession().getAttribute("loginUser");
-            if (isLogin != null && isLogin) {
-                itemViews.forEach(itemView -> {
-                    Map<String, Object> map = userService.selectAction(loginUser.getId(), itemView.getId(), itemView.getUserId());
-                    itemView.setIsFavourite((FavouriteDao) map.get("isFavourite"));
-                    itemView.setIsLike((LikeDao) map.get("isLike"));
-                    itemView.setIsFollowed((FollowedDao) map.get("isFollowed"));
-                    //将所有评论装进itemView中的list中
-                    itemView.setCommentModels(commentService.selectByItemId(itemView.getId()));
-                });
-            } else {
-                itemViews.forEach(itemView -> {
-                    //将所有评论装进itemView中的list中
-                    itemView.setCommentModels(commentService.selectByItemId(itemView.getId()));
-                });
-            }
-            //将PageBean<ItemModel>转成PageBean<ItemView>
-            return CommonReturnType.create(convertPageBean(pageBean, itemViews));
-        } catch (Exception e) {
-            e.printStackTrace();
-            e.printStackTrace(PEM);
-            String exception = SEM.toString();
-            admUserService.insertErrorsLog(exception);
-            return CommonReturnType.create(e);
+        //userId等于0要不就是未登陆，要不就是加载广场，所以不用管是哪种情况，直接加载广场页面就可以了
+        if (currentPage == null | pageSize == null) {
+            currentPage = 1;
+            pageSize = 5;
         }
+        if (currentPage < 1) {
+            currentPage = 1;
+        }
+        List<ItemView> itemViews = new ArrayList<>();
+        //获取基本的帖子信息
+        PageBean<ItemModel> pageBean = itemService.getItemModelForPage(search, currentPage, pageSize, userId);
+        //根据基本的帖子信息获取所有的关于帖子的信息(这里只有评论信息)，并进行聚合操作，封装到ItemView中返回给前端
+        //使用lambda表达式进行操作
+        pageBean.getList().forEach(itemModel -> {
+            //将ItemModel转成前端需要的ItemView
+            itemViews.add(convertItemViewFromItemModel(itemModel));
+        });
+        //判断一下前端是否有用户id传过来，有就说明用户已经登陆，反之无
+        Boolean isLogin = (Boolean) request.getSession().getAttribute("isLogin");
+        UserModel loginUser = (UserModel) request.getSession().getAttribute("loginUser");
+        if (isLogin != null && isLogin) {
+            getLoginItemViews(itemViews, loginUser);
+        } else {
+            itemViews.forEach(itemView -> {
+                //将所有评论装进itemView中的list中
+                itemView.setCommentModels(commentService.selectByItemId(itemView.getId()));
+            });
+        }
+        //将PageBean<ItemModel>转成PageBean<ItemView>
+        return CommonReturnType.create(convertPageBean(pageBean, itemViews));
+    }
+
+    private void getLoginItemViews(List<ItemView> itemViews, UserModel loginUser) {
+        itemViews.forEach(itemView -> {
+            Map<String, Object> map = userService.selectAction(loginUser.getId(), itemView.getId(), itemView.getUserId());
+            itemView.setIsFavourite((FavouriteDao) map.get("isFavourite"));
+            itemView.setIsLike((LikeDao) map.get("isLike"));
+            itemView.setIsFollowed((FollowedDao) map.get("isFollowed"));
+            //将所有评论装进itemView中的list中
+            itemView.setCommentModels(commentService.selectByItemId(itemView.getId()));
+        });
     }
 
     private ItemView convertItemViewFromItemModel(ItemModel itemModel) {
@@ -300,8 +254,4 @@ public class ItemController /*extends BaseController */ {
         return formatTime;
     }
 
-    public void insertServiceLog(String service_name,String service_url) throws BusinessException{
-        UserModel userModel = (UserModel) request.getSession().getAttribute("loginUser");
-        userService.insertServiceLog(userModel,service_name,service_url);
-    }
 }

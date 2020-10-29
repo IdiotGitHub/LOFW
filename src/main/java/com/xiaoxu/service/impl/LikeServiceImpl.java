@@ -4,10 +4,10 @@ import com.xiaoxu.dao.ItemDaoMapper;
 import com.xiaoxu.dao.LikeDaoMapper;
 import com.xiaoxu.dataobject.LikeDao;
 import com.xiaoxu.service.LikeService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.Date;
 
 /**
@@ -15,23 +15,24 @@ import java.util.Date;
  */
 @Service
 public class LikeServiceImpl implements LikeService {
-    @Autowired
+    @Resource
     LikeDaoMapper likeDaoMapper;
-    @Autowired
+    @Resource
     ItemDaoMapper itemDaoMapper;
+
     @Override
     public boolean selectLikeStatus(Integer userId, Integer itemId) {
-
         LikeDao likeDao = likeDaoMapper.selectByUserIdAndItemId(userId, itemId);
         return likeDao != null;
     }
+
     @Transactional(rollbackFor = {})
     @Override
     public void cancelLike(Integer userId, Integer itemId) {
-
         likeDaoMapper.cancelLike(userId, itemId);
         itemDaoMapper.decreaseLike(itemId);
     }
+
     @Transactional(rollbackFor = {})
     @Override
     public void doLike(Integer userId, Integer itemId) {

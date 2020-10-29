@@ -9,15 +9,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Created on 2019/11/17 15:03
  *
- * @Author Xiaoxu
- * @Version 1.0
+ * @author Xiaoxu
  */
 public class BaseController {
     public static final String CONTENT_TYPE_FORMED = "application/x-www-form-urlencoded";
@@ -30,15 +28,13 @@ public class BaseController {
     //但是使用handler的方式仅仅只能返回一个路径，那么加入@ResponseBody注解就可以了
 
     /**
-     *
-     * @param request
-     * @param ex
+     * @param ex 异常类型
      * @return
      */
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public Object handlerException(HttpServletRequest request, Exception ex) {
+    public Object handlerException(Exception ex) {
         //如果返回null，则页面啥也没有
         //那么可以将异常信息返回出去再做处理
         Map<String, Object> map = new HashMap<>();

@@ -1,5 +1,8 @@
 package com.xiaoxu.service.model;
 
+/**
+ * @author xiaoxu
+ */
 public class ChattingRecordsModel{
     /**
      *

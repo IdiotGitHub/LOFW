@@ -9,26 +9,28 @@ import com.xiaoxu.response.UnreadMessageBean;
 import com.xiaoxu.service.ChattingRecordsService;
 import com.xiaoxu.service.FollowService;
 import com.xiaoxu.utils.WebSocketServer;
+import jdk.nashorn.internal.ir.annotations.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.List;
 
 /**
  * 消息推送
  *
- * @author :ZHANGPENGFEI
+ * @author xiaoxu
  **/
 @Controller
 @RequestMapping("/websocket")
 @CrossOrigin(origins = "*", allowCredentials = "true", allowedHeaders = {"Access-Control-Allow-Origin: *"})
 public class WebSocketController {
-    @Autowired
+    @Reference
     FollowService followService;
-    @Autowired
+    @Resource
     ChattingRecordsService recordsService;
 
     /**
@@ -86,11 +88,12 @@ public class WebSocketController {
             throw new BusinessException(EmBusinessError.USER_NOT_LOGIN);
         }
         List<UnreadMessageBean> beans = recordsService.getUnreadMessage(loginUserId);
-        if (beans == null){
+        if (beans == null) {
             return CommonReturnType.create(null);
         }
         return CommonReturnType.create(beans);
     }
+
     @ResponseBody
     @RequestMapping(value = "socket/getRecords", method = RequestMethod.POST)
     public CommonReturnType getRecords(@RequestParam("loginUserId") Integer loginUserId,
@@ -99,8 +102,8 @@ public class WebSocketController {
         if (loginUserId == 0) {
             throw new BusinessException(EmBusinessError.USER_NOT_LOGIN);
         }
-        ChattingRecordsBean bean = recordsService.getChattingRecords(loginUserId,recUserId);
-        if (bean == null){
+        ChattingRecordsBean bean = recordsService.getChattingRecords(loginUserId, recUserId);
+        if (bean == null) {
             return CommonReturnType.create(null);
         }
         return CommonReturnType.create(bean);

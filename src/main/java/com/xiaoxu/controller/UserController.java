@@ -25,7 +25,7 @@ import java.util.Base64.Encoder;
 /**
  * Created on 2019/11/26 9:38
  *
- * @Author Xiaoxu
+ * @author Xiaoxu
  */
 @Controller
 @CrossOrigin(origins = "*", allowCredentials = "true")
@@ -45,7 +45,7 @@ public class UserController extends BaseController {
     public CommonReturnType isLogin() throws BusinessException {
         HttpSession session = httpServletRequest.getSession();
         Boolean bool = (Boolean) session.getAttribute("isLogin");
-        UserModel userModel = null;
+        UserModel userModel;
         if (bool != null && bool) {
             userModel = (UserModel) session.getAttribute("loginUser");
         } else {
@@ -58,11 +58,11 @@ public class UserController extends BaseController {
 
     @RequestMapping(value = "/updatePassword", method = {RequestMethod.POST}, consumes = {CONTENT_TYPE_FORMED})
     @ResponseBody
-    public CommonReturnType updatePassword(@RequestParam("telphone") String telphone,
+    public CommonReturnType updatePassword(@RequestParam("telephone") String telephone,
                                            @RequestParam("oldPassword") String oldPassword,
                                            @RequestParam("newPassword") String newPassword
     ) throws BusinessException, NoSuchAlgorithmException {
-        userService.updatePassword(telphone, enCodeByMd5(oldPassword), enCodeByMd5(newPassword));
+        userService.updatePassword(telephone, enCodeByMd5(oldPassword), enCodeByMd5(newPassword));
         httpServletRequest.getSession().removeAttribute("loginUser");
         return CommonReturnType.create(null);
     }
@@ -168,7 +168,7 @@ public class UserController extends BaseController {
 
     @RequestMapping(value = "/logout", method = RequestMethod.POST)
     @ResponseBody
-    public CommonReturnType logout() throws BusinessException {
+    public CommonReturnType logout() {
         boolean isLogin = (boolean) httpServletRequest.getSession().getAttribute("isLogin");
         if (!isLogin) {
             return CommonReturnType.create(null);
@@ -275,13 +275,6 @@ public class UserController extends BaseController {
         BeanUtils.copyProperties(userModel, userView);
         return userView;
     }
-
-/*    public void insertServiceLog(String service_name, String service_url) throws BusinessException {
-        String clazz = this.getClass().getName() + ".";
-        UserModel userModel = (UserModel) httpServletRequest.getSession().getAttribute("loginUser");
-        userService.insertServiceLog(userModel, service_name, clazz + service_url);
-    }*/
-
 
     @RequestMapping("/doReport")
     @ResponseBody

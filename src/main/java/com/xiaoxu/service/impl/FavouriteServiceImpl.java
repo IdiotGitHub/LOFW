@@ -4,10 +4,10 @@ import com.xiaoxu.dao.FavouriteDaoMapper;
 import com.xiaoxu.dao.ItemDaoMapper;
 import com.xiaoxu.dataobject.FavouriteDao;
 import com.xiaoxu.service.FavouriteService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.Date;
 
 /**
@@ -15,16 +15,18 @@ import java.util.Date;
  */
 @Service
 public class FavouriteServiceImpl implements FavouriteService {
-    @Autowired
+    @Resource
     FavouriteDaoMapper favouriteDaoMapper;
-    @Autowired
+    @Resource
     ItemDaoMapper itemDaoMapper;
+
     @Override
     public boolean selectFavouriteStatus(Integer userId, Integer itemId) {
 
         FavouriteDao favouriteDao = favouriteDaoMapper.selectByUserIdAndItemId(userId, itemId);
         return favouriteDao != null;
     }
+
     @Transactional(rollbackFor = {})
     @Override
     public void cancelFavourite(Integer userId, Integer itemId) {
@@ -32,6 +34,7 @@ public class FavouriteServiceImpl implements FavouriteService {
         favouriteDaoMapper.cancelFavourite(userId, itemId);
         itemDaoMapper.decreaseFavourite(itemId);
     }
+
     @Transactional(rollbackFor = {})
     @Override
     public void doFavourite(Integer userId, Integer itemId) {

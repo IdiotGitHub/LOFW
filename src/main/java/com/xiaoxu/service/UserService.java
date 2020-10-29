@@ -71,9 +71,9 @@ public interface UserService {
 
     List<UserModel> getUsers();
 
-    int fengHao(Integer userId);
+    int recoverAccount(Integer userId);
 
-    int jieFeng(Integer userId);
+    int banAccount(Integer userId);
 
     void doReport(Map rp) throws BusinessException;
 

@@ -5,18 +5,28 @@ import java.util.List;
 /**
  * 存放分页信息
  *
- * @author Administrator
+ * @author xiaoxu
  */
 public class PageBean<T> {
-    //总页数
+    /**
+     * 总页数
+     */
     private Integer totalPages;
-    //当前页码
+    /**
+     * 当前页码
+     */
     private Integer currentPage;
-    //总数据数量
+    /**
+     * 总数据数量
+     */
     private Integer totalCounts;
-    //存放查询结果
+    /**
+     * 存放查询结果
+     */
     private List<T> list;
-    //每页展示数据量
+    /**
+     * 每页展示数据量
+     */
     private Integer pageSize;
 
     @Override

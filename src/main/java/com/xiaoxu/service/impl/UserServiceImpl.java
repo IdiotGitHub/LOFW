@@ -10,35 +10,35 @@ import com.xiaoxu.service.model.UserModel;
 import com.xiaoxu.validator.ValidationResult;
 import com.xiaoxu.validator.ValidatorImpl;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.*;
 
 /**
  * 在service层不能直接将查询到的对象传到想要该对象的服务
  * 需要在此层定义一个model层用来处理真正的业务逻辑，而dataobject仅仅作为与数据库的映射
  *
- * @author Administrator
+ * @author xiaoxu
  */
 @Service
 public class UserServiceImpl implements UserService {
-    @Autowired
+    @Resource
     private UserDaoMapper userDaoMapper;
 
-    @Autowired
+    @Resource
     private UserPasswordDaoMapper userPasswordDaoMapper;
-    @Autowired
+    @Resource
     private LikeDaoMapper likeDaoMapper;
-    @Autowired
+    @Resource
     private FavouriteDaoMapper favouriteDaoMapper;
-    @Autowired
+    @Resource
     private FollowedDaoMapper followedDaoMapper;
-    @Autowired
+    @Resource
     private ValidatorImpl validator;
-    @Autowired
+    @Resource
     private AdmUserServiceMapper admUserServiceMapper;
 
     @Override
@@ -50,7 +50,6 @@ public class UserServiceImpl implements UserService {
             return null;
         }
         UserPasswordDao userPasswordDao = userPasswordDaoMapper.selectByUserId(userDao.getId());
-        String aaa = this.getClass().getName();
         return convertFromDataObject(userDao, userPasswordDao);
     }
 
@@ -63,23 +62,23 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = {})
     @Override
     public void register(UserModel userModel) throws BusinessException {
-        //首先判空，必要操作
+        // 首先判空，必要操作
         if (userModel == null) {
             throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR);
         }
-        //使用自定义的validator进行校验
+        // 使用自定义的validator进行校验
         ValidationResult validate = validator.validate(userModel);
         if (validate.isHasError()) {
             throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, validate.getErrorMsg());
         }
-        //将userModel分离
+        // 将userModel分离
         UserDao userDao = convertUserDaoFromUserModel(userModel);
-        //将数据写入数据库，因为此处牵扯到两张表的数据插入，因此需要使用事务进行处理
-        //因为数据库中设置了手机号码为unique，因此同一个手机号重复注册时会抛出异常，该异常会被spring所捕获，为了更好的用户体验，应该在此处进行捕获，给出具体的错误原因
+        // 将数据写入数据库，因为此处牵扯到两张表的数据插入，因此需要使用事务进行处理
+        // 因为数据库中设置了手机号码为unique，因此同一个手机号重复注册时会抛出异常，该异常会被spring所捕获，为了更好的用户体验，应该在此处进行捕获，给出具体的错误原因
         try {
             userDaoMapper.insertSelective(userDao);
         } catch (DuplicateKeyException ex) {
-//            DuplicateKeyException,该异常是唯一索引引起的异常,
+            // DuplicateKeyException,该异常是唯一索引引起的异常,
             throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "该手机号已经被注册请勿重复注册");
         }
         //因为user_info表的id是自增键，因此需要将其取出来赋值给userModel，但此处如果不在mybatis中进行相应的设置的话是无法直接取出的
@@ -89,7 +88,6 @@ public class UserServiceImpl implements UserService {
         userPasswordDaoMapper.insertSelective(userPasswordDao);
     }
 
-    //    @Cacheable(value = {"my-redis-cache1"})
     @Override
     public UserModel login(String telephone, String password) throws BusinessException {
         UserDao userDao = userDaoMapper.selectByTelphone(telephone);
@@ -112,8 +110,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updatePassword(String telphone, String oldPassword, String newPassword) throws BusinessException {
-        UserDao userDao = userDaoMapper.selectByTelphone(telphone);
+    public void updatePassword(String telephone, String oldPassword, String newPassword) throws BusinessException {
+        UserDao userDao = userDaoMapper.selectByTelphone(telephone);
         if (userDao == null) {
             throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "手机号不存在");
         }
@@ -192,14 +190,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void insertServiceLog(UserModel user_info, String service_name, String service_url) {
-        Map<String, Object> logMap = new HashMap<>();
-        logMap.put("user_id", user_info.getId());
-        logMap.put("user_telephone", user_info.getTelephone());
+    public void insertServiceLog(UserModel userInfo, String serviceName, String serviceUrl) {
+        Map<String, Object> logMap = new HashMap<>(7);
+        logMap.put("user_id", userInfo.getId());
+        logMap.put("user_telephone", userInfo.getTelephone());
         logMap.put("req_info", "请求");
         logMap.put("result_desc", "成功");
-        logMap.put("service_url", service_url);
-        logMap.put("service_name", service_name);
+        logMap.put("service_url", serviceUrl);
+        logMap.put("service_name", serviceName);
         logMap.put("create_time", new Date(System.currentTimeMillis()));
 
         admUserServiceMapper.insertServiceLog(logMap);
@@ -216,22 +214,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public int fengHao(Integer userId) {
+    public int recoverAccount(Integer userId) {
         return userDaoMapper.updateStatus2ByUserId(userId);
     }
 
     @Override
-    public int jieFeng(Integer userId) {
+    public int banAccount(Integer userId) {
         return userDaoMapper.updateStatus1ByUserId(userId);
     }
 
 
+    @Override
     public void doReport(Map rp) {
         admUserServiceMapper.doReport(rp);
     }
 
+    @Override
     public UserDao getUserByPhone(String phone) {
-        UserDao userDao = userDaoMapper.selectByTelphone(phone);
-        return userDao;
+        return userDaoMapper.selectByTelphone(phone);
     }
 }

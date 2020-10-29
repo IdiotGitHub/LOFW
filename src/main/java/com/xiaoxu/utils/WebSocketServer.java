@@ -16,8 +16,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
 /**
  * WebSocket服务类
  *
- * @author :Xiaoxu
- * @create 2019-12-19
+ * @author Xiaoxu
+ * @date  2019-12-19
  **/
 @ServerEndpoint("/websocket/{userId}")
 @Component
@@ -30,7 +30,7 @@ public class WebSocketServer {
     /**
      * concurrent包的线程安全Set，用来存放每个客户端对应的MyWebSocket对象。
      */
-    private static final CopyOnWriteArraySet<WebSocketServer> WEB_SOCKET_SET = new CopyOnWriteArraySet<WebSocketServer>();
+    private static final CopyOnWriteArraySet<WebSocketServer> WEB_SOCKET_SET = new CopyOnWriteArraySet<>();
 
     /**
      * 与某个客户端的连接会话，需要通过它来给客户端发送数据
@@ -128,10 +128,6 @@ public class WebSocketServer {
         }
     }
 
-    /**
-     * @param session
-     * @param error
-     */
     @OnError
     public void onError(Session session, Throwable error) {
         log.error("发生错误" + session.getId());

@@ -8,8 +8,7 @@ import javax.validation.constraints.NotNull;
 /**
  * Created on 2019/11/26 9:08
  *
- * @Author Xiaoxu
- * @Version 1.0
+ * @author Xiaoxu
  */
 public class UserModel {
 
