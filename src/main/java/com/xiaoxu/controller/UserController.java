@@ -50,7 +50,7 @@ public class UserController extends BaseController {
             userModel = (UserModel) session.getAttribute("loginUser");
         } else {
             // 未登录
-            return CommonReturnType.create(null, "failed");
+            throw new BusinessException(EmBusinessError.USER_NOT_LOGIN);
         }
 
         return CommonReturnType.create(convertFromUserModel(userModel));
@@ -192,10 +192,10 @@ public class UserController extends BaseController {
     @ResponseBody
     public CommonReturnType getFans(@RequestParam(name = "id") Integer id) throws BusinessException {
         //先判断用户是否已经登录，未登录不允许通过访问
-        Boolean isLogin = (Boolean) httpServletRequest.getSession().getAttribute("isLogin");
+/*        Boolean isLogin = (Boolean) httpServletRequest.getSession().getAttribute("isLogin");
         if (isLogin == null || !isLogin) {
             throw new BusinessException(EmBusinessError.USER_NOT_LOGIN);
-        }
+        }*/
         //调用service服务获取已登陆用户的关注人列表并返回给前端
         List<UserModel> userModels = userService.getFans(id);
         List<UserView> userViewList = new ArrayList<>();
@@ -217,10 +217,10 @@ public class UserController extends BaseController {
     @ResponseBody
     public CommonReturnType getFollows(@RequestParam(name = "id") Integer id) throws BusinessException {
         //先判断用户是否已经登录，未登录不允许通过访问
-        Boolean isLogin = (Boolean) httpServletRequest.getSession().getAttribute("isLogin");
+/*        Boolean isLogin = (Boolean) httpServletRequest.getSession().getAttribute("isLogin");
         if (isLogin == null || !isLogin) {
             throw new BusinessException(EmBusinessError.USER_NOT_LOGIN);
-        }
+        }*/
         //调用service服务获取已登陆用户的关注人列表并返回给前端
         List<UserModel> userModels = userService.getFollows(id);
         List<UserView> userViewList = new ArrayList<>();

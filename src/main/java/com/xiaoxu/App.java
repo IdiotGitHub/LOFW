@@ -7,15 +7,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 /**
  * Hello world!
  *
- * @author Administrator
+ * @author xiaoxu
  */
 @SpringBootApplication(scanBasePackages = {"com.xiaoxu"})
-@MapperScan("com.yangyang.dao")
-public class App 
-{
-    public static void main( String[] args )
-    {
-        System.out.println( "Hello World!" );
+@MapperScan("com.xiaoxu.dao")
+public class App {
+    public static void main(String[] args) {
+        System.out.println("Hello World!");
         SpringApplication.run(App.class, args);
     }
 }

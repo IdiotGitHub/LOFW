@@ -73,11 +73,18 @@ public class WebSocketController {
 
     @ResponseBody
     @RequestMapping(value = "socket/p2p", method = RequestMethod.POST)
-    public void p2P(@RequestParam("loginUserId") Integer loginUserId,
+    public void p2P(@RequestParam(name = "sendUserId") Integer sendUserId,
                     @RequestParam(name = "recUserId") Integer recUserId,
-                    MultipartFile conImg
+                    @RequestParam(name = "message") String message
     ) throws BusinessException {
-
+        if (sendUserId == 0) {
+            throw new BusinessException(EmBusinessError.USER_NOT_LOGIN);
+        }
+        try {
+            WebSocketServer.sendInfo(message, String.valueOf(sendUserId), String.valueOf(recUserId));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @ResponseBody

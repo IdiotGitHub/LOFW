@@ -24,7 +24,7 @@ public enum EmBusinessError implements CommonError {
         this.errorMsg = errorMsg;
     }
 
-    private int errorCode;
+    private final int errorCode;
     private String errorMsg;
 
     @Override

@@ -35,6 +35,7 @@ public class BaseController {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public Object handlerException(Exception ex) {
+        ex.printStackTrace();
         //如果返回null，则页面啥也没有
         //那么可以将异常信息返回出去再做处理
         Map<String, Object> map = new HashMap<>();

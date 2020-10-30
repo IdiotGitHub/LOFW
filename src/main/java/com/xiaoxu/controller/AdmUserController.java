@@ -1,3 +1,4 @@
+/*
 package com.xiaoxu.controller;
 
 import com.xiaoxu.controller.view.ItemView;
@@ -26,18 +27,24 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+*/
 /**
  * Created on 2019/11/26 9:38
  *
  * @Author Xiaoxu
- */
+ *//*
+
 @Controller
 @CrossOrigin(origins = "*", allowCredentials = "true")
 @RequestMapping("/admUser")
-public class AdmUserController /*extends BaseController*/ {
-    /**
+public class AdmUserController */
+/*extends BaseController*//*
+ {
+    */
+/**
      *
-     */
+     *//*
+
     public static final String CONTENT_TYPE_FORMED = "application/x-www-form-urlencoded";
     public static final int USER_STATUS_BAN = 2;
     public static final int USER_STATUS_ALLOW = 1;
@@ -96,10 +103,12 @@ public class AdmUserController /*extends BaseController*/ {
         }
     }
 
-    /**
+    */
+/**
      * java普通md5实现的方式实现的结果只支持16位的md5
      * 因此需要处理一下
-     */
+     *//*
+
     public String enCodeByMd5(String str) throws NoSuchAlgorithmException {
         //确定计算方法
         //使用MessageDigest类获取md5的实例
@@ -122,10 +131,12 @@ public class AdmUserController /*extends BaseController*/ {
             int userId = userModel.getId();
             httpServletRequest.getSession().removeAttribute("isLogin");
             httpServletRequest.getSession().removeAttribute("loginUser");
-        /*UserModel userModel = (UserModel)httpServletRequest.getSession().getAttribute("loginUser");
+        */
+/*UserModel userModel = (UserModel)httpServletRequest.getSession().getAttribute("loginUser");
         if (userModel != null){
             throw new BusinessException(EmBusinessError.USER_NOT_LOGIN);
-        }*/
+        }*//*
+
             userService.logout(userId);
             return CommonReturnType.create(null);
         }catch (Exception e) {
@@ -351,3 +362,4 @@ public class AdmUserController /*extends BaseController*/ {
         }
     }
 }
+*/

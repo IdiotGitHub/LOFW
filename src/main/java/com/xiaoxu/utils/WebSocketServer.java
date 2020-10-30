@@ -17,7 +17,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * WebSocket服务类
  *
  * @author Xiaoxu
- * @date  2019-12-19
+ * @date 2019-12-19
  **/
 @ServerEndpoint("/websocket/{userId}")
 @Component
@@ -52,6 +52,7 @@ public class WebSocketServer {
         WEB_SOCKET_SET.add(this);
         this.sid = sid;
         log.info("已经登陆;在线人数：" + WEB_SOCKET_SET.size());
+        WEB_SOCKET_SET.forEach(item -> log.info(item));
 /*        if (WEB_SOCKET_SET.size() == 0) {
             //加入set中
             WEB_SOCKET_SET.add(this);
@@ -145,7 +146,7 @@ public class WebSocketServer {
     /**
      * 群发自定义消息
      */
-    public static void sendInfo(String message,String cid, String sid) throws IOException {
+    public static void sendInfo(String message, String cid, String sid) throws IOException {
         MessageDao messageDao = new MessageDao();
         messageDao.setUserId(Integer.valueOf(cid));
         messageDao.setFlag(true);
@@ -198,5 +199,13 @@ public class WebSocketServer {
     @Override
     public int hashCode() {
         return Objects.hash(session, sid);
+    }
+
+    @Override
+    public String toString() {
+        return "WebSocketServer{" +
+                "session=" + session +
+                ", sid='" + sid + '\'' +
+                '}';
     }
 }

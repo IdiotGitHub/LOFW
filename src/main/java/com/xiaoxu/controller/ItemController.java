@@ -50,8 +50,6 @@ public class ItemController extends BaseController {
     private UserService userService;
     @Resource
     private HttpServletRequest request;
-    @Resource
-    private AdmUserService admUserService;
 
     @RequestMapping(value = "createItem", method = RequestMethod.POST)
     @ResponseBody
@@ -121,7 +119,8 @@ public class ItemController extends BaseController {
         if (isLogin != null && isLogin) {
             getLoginItemViews(itemViews, loginUser);
         } else {
-            throw new BusinessException(EmBusinessError.USER_NOT_LOGIN, "error");
+            //将所有评论装进itemView中的list中
+            itemViews.forEach(itemView -> itemView.setCommentModels(commentService.selectByItemId(itemView.getId())));
         }
         //将PageBean<ItemModel>转成PageBean<ItemView>
         return CommonReturnType.create(convertPageBean(pageBean, itemViews));
@@ -169,7 +168,8 @@ public class ItemController extends BaseController {
         if (isLogin != null && isLogin) {
             getLoginItemViews(itemViews, loginUser);
         } else {
-            throw new BusinessException(EmBusinessError.USER_NOT_LOGIN, "error");
+            //将所有评论装进itemView中的list中
+            itemViews.forEach(itemView -> itemView.setCommentModels(commentService.selectByItemId(itemView.getId())));
         }
         //将PageBean<ItemModel>转成PageBean<ItemView>
         return CommonReturnType.create(convertPageBean(pageBean, itemViews));
@@ -224,7 +224,6 @@ public class ItemController extends BaseController {
             itemView.setIsFavourite((FavouriteDao) map.get("isFavourite"));
             itemView.setIsLike((LikeDao) map.get("isLike"));
             itemView.setIsFollowed((FollowedDao) map.get("isFollowed"));
-            //将所有评论装进itemView中的list中
             itemView.setCommentModels(commentService.selectByItemId(itemView.getId()));
         });
     }
